@@ -1,0 +1,152 @@
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.form-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* İkiye bölünmüş yapıyı tanımlar */
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input, select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.error {
+  color: red;
+  font-size: 0.9rem;
+}
+
+.message {
+  margin-top: 10px;
+  color: green;
+  font-weight: bold;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.checkbox-group label {
+  margin-right: 10px;
+}
+
+.product-list {
+  margin-top: 40px;
+}
+
+.product-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-list th, .product-list td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.product-list th {
+  background-color: #f4f4f4;
+}
+
+.container {
+  width: 100%; /* Tüm genişlik */
+  max-width: none; /* Herhangi bir sınır kaldır */
+  margin: 0 auto; /* Ortala */
+  padding: 20px;
+  box-sizing: border-box; /* Padding genişliğe dahil */
+}
+
+
+h3 {
+  text-align: center;
+}
+
+.table-wrapper {
+  overflow-x: auto; /* Taşmayı yönetmek için yatay kaydırma */
+  max-width: 100%; /* Alanın tamamını kullan */
+}
+
+table {
+  width: 100%; /* Tabloyu bulunduğu alana sığdır */
+  border-collapse: collapse; /* Kenarlıkları birleştir */
+  table-layout: fixed; /* Sütun genişliklerini eşit dağıt */
+}
+th, td {
+  padding: 8px; /* Hücreler arası boşluk */
+  text-align: center; /* Ortala */
+  border: 1px solid #ddd; /* Kenarlık */
+  word-wrap: break-word; /* Uzun metinlerin taşmasını önler */
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+button.btn-edit {
+  background-color: #ffc107;
+}
+
+button.btn-delete {
+  background-color: #f44336;
+}
+img {
+  max-width: 50px;
+  height: auto;
+}
+
+.form-full {
+  grid-column: 1 / -1; /* Tüm sütunları kapla */
+  margin-top: 20px; /* Üst boşluk */
+}
+
+.centered-label {
+  display: block;
+  text-align: center; /* Ortala */
+  margin-bottom: 10px; /* Label ile textarea arasındaki boşluk */
+  font-weight: bold; /* Vurgulu görünüm */
+}
+
+textarea {
+  width: 100%; /* Tüm genişlik */
+  height: 100px; /* Yükseklik */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical; /* Kullanıcı boyutlandırabilsin */
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block; /* Hata düzgün görüntülensin */
+}

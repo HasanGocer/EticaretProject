@@ -1,0 +1,92 @@
+  /* Login Kart */
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .login-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* Başlıklar */
+  .login-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .login-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  /* Form Elemanları */
+  .login-form {
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .form-input:focus {
+    border-color: #FF7E5F;
+    outline: none;
+  }
+  
+  /* Buton */
+  .login-button {
+    width: 100%;
+    padding: 12px;
+    background: #FF7E5F;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .login-button:hover {
+    background: #E56C50;
+  }
+  
+  /* Hata Mesajı */
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
+  /* Footer */
+  .login-footer {
+    margin-top: 20px;
+  }
+  
+  .register-link {
+    color: #FF7E5F;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .register-link:hover {
+    text-decoration: underline;
+  }
+  
