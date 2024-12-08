@@ -34,18 +34,26 @@ const Header = ({ bannerVisible, closeBanner }) => {
         total + item.price * item.quantity * (1 - item.discountRate / 100),
       0
     );
-
-  const handleQuantityChange = (itemId, change) => {
-    const item = cartItems.find((item) => item.id === itemId);
-    if (item) {
-      const newQuantity = item.quantity + change;
-      if (newQuantity < 1) {
-        removeFromCart(itemId); // Remove item if quantity is 0
-      } else if (newQuantity <= item.stock) {
-        updateCartItemQuantity(itemId, newQuantity); // Update item quantity
-      }
-    }
+     const handleCheckout = () => {
+    navigate("/payment", { state: { totalPrice: calculateTotalPrice() } });
   };
+
+    const handleQuantityChange = (itemId, change) => {
+  const item = cartItems.find((item) => item.id === itemId);
+  if (item) {
+    const newQuantity = item.quantity + change;
+
+    if (newQuantity < 1) {
+      removeFromCart(itemId); // Adet 0'ın altına düşerse ürünü kaldır
+    } else {
+      // Adet stok sınırlarını aşmıyorsa güncelle
+      updateCartItemQuantity(itemId, Math.min(newQuantity, item.stockQuantity)); // `item.stock` yerine `item.stockQuantity` kullanılıyor
+    }
+  }
+};
+
+    
+    
 
   return (
     <>
@@ -132,7 +140,7 @@ const Header = ({ bannerVisible, closeBanner }) => {
                 <p>
                   <strong>İndirim Sonrası Fiyat:</strong> {calculateDiscountedPrice().toFixed(2)} TL
                 </p>
-                <button onClick={() => navigate("/checkout")} className="checkout-button">
+                <button onClick={() => navigate("/Payment")} className="checkout-button">
                   Ödeme Yap
                 </button>
                 <button onClick={toggleCart} className="continue-shopping-button">

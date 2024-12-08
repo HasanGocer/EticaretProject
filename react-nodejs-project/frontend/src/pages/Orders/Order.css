@@ -1,0 +1,106 @@
+/* Genel stilleme */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9;
+}
+
+/* Sayfa Ana Container */
+.order-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Sipariş Başlığı */
+.order-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: #333333;
+}
+
+/* Sipariş Listesi */
+.order-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+/* Sipariş Kartları */
+.order-card {
+  flex: 1 1 calc(33% - 1rem);
+  background-color: #e9f5ff;
+  border: 1px solid #b3d8ff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Sipariş Bilgileri */
+.order-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.order-card h3 {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  color: #333333;
+}
+
+.order-card p {
+  font-size: 0.9rem;
+  color: #555555;
+  margin: 0.5rem 0;
+}
+
+.order-card .order-price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #0073e6;
+}
+
+/* Butonlar */
+.order-button {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  background: #0073e6;
+  color: white;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.order-button:hover {
+  background: #005bb5;
+}
+
+/* Sipariş Bilgi Section */
+.order-info {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #555;
+}
+
+.order-info p {
+  font-size: 0.95rem;
+  margin: 0.5rem 0;
+}

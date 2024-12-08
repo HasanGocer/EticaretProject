@@ -6,6 +6,7 @@ import './EditProduct.css'; // Özel stil dosyası
 function EditProduct() {
   //#region fields
   const [categorys, setCategorys] = useState([]);
+  const [subcategorys, setSubcategorys] = useState([]);
   const [trademarks, setTrademarks] = useState([]);
   const [variants, setVariants] = useState([]);
   const [additionalFeatures, setAdditionalFeatures] = useState([]);
@@ -21,7 +22,6 @@ function EditProduct() {
   const fetchProducts = async () => {
     try {
       const response = await axios.get("http://localhost:5000/get-products");
-      console.log(response);
       setProducts(response.data);
       const response1 = await axios.get("http://localhost:5000/get-product-variants");
       setProductVariants(response1.data);
@@ -42,6 +42,14 @@ function EditProduct() {
       setAdditionalFeatures(additionalFeatureRes.data);
       const variantRes = await axios.get("http://localhost:5000/get-variants");
       setVariants(variantRes.data);
+    } catch (error) {
+      console.error("Dropdown verilerini alırken hata oluştu.", error);
+    }
+  };
+  const fetchDropdownSubCategoryData = async () => {
+    try {
+      const subcategoryRes = await axios.get("http://localhost:5000/get-subcategorys");
+      setSubcategorys(subcategoryRes.data);
     } catch (error) {
       console.error("Dropdown verilerini alırken hata oluştu.", error);
     }
@@ -73,6 +81,10 @@ const getAdditionalFeatureNames = (featureIds) => {
 
   return featureNames.length > 0 ? featureNames : <li>Bilinmeyen Özellik</li>; // Eğer özellik bulunmazsa, bir varsayılan mesaj döner
 };
+const getSubcategoryName = (subcategoryId) => {
+  const subcategory = subcategorys.find((subcat) => subcat.id === subcategoryId);
+  return subcategory ? subcategory.name : "Bilinmeyen Alt Kategori";
+};
 //#endregion
 //#region  handles
 const handleSubmit = async (e) => {
@@ -86,6 +98,7 @@ const handleSubmit = async (e) => {
   data.append("discountRate", editingProduct.discountRate);
   data.append("description", editingProduct.description);
   data.append("category_id", editingProduct.category_id);
+  data.append("subcategory_id", editingProduct.subcategory_id);
   data.append("trademark_id", editingProduct.trademark_id);
   data.append("variants_id", JSON.stringify(editingProduct.variants_id));
   data.append("additionalfeatures_id", JSON.stringify(editingProduct.additionalfeatures_id));
@@ -156,6 +169,7 @@ const handleSubmit = async (e) => {
   useEffect(() => {
     fetchDropdownData();
     fetchProducts();
+    fetchDropdownSubCategoryData();
   }, []);
   useEffect(() => {
     if (editingTime && editingProduct) {
@@ -176,9 +190,6 @@ const handleSubmit = async (e) => {
       }));
     }
   }, [editingTime]);
-  
-  
-  
 
   return (
     <div className="container">
@@ -199,6 +210,7 @@ const handleSubmit = async (e) => {
               <th>İndirimli Fiyat</th>
               <th>Açıklama</th>
               <th>Kategori</th>
+              <th>Alt Kategori</th> {/* Yeni sütun */}
               <th>Marka</th>
               <th>Varyantlar</th>
               <th>Ekstra Özellikler</th>
@@ -217,6 +229,7 @@ const handleSubmit = async (e) => {
                 <td>{calculateDiscountedPrice(product.price, product.discountRate)}₺</td>
                 <td>{product.description}</td>
                 <td>{getCategoryName(product.category_id)}</td>
+                <td>{getSubcategoryName(product.subcategory_id)}</td> {/* Yeni hücre */}
                 <td>{getTrademarkName(product.trademark_id)}</td>
                 <td>{getVariantNames(product)}</td>
                 <td>{getAdditionalFeatureNames(product)}</td>
@@ -299,7 +312,12 @@ const handleSubmit = async (e) => {
             <div>
               <label>Kategori:</label>
               <select
-                onChange={(e) => setEditingProduct({  ...editingProduct, category_id: e.target.value })}
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    category_id: e.target.value,
+                  })
+                }
                 value={editingProduct.category_id}
               >
                 {categorys.map((category) => (
@@ -309,6 +327,28 @@ const handleSubmit = async (e) => {
                 ))}
               </select>
             </div>
+
+            <div className="form-group">
+              <select
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    subcategory_id: e.target.value,
+                  })
+                }
+                value={editingProduct.subcategory_id}
+              >
+                <option value="">Alt Kategori Seçin</option>
+                {subcategorys
+                  .filter((subcategory) => subcategory.category_id === editingProduct.category_id)
+                  .map((subcategory) => (
+                    <option key={subcategory.id} value={subcategory.id}>
+                      {subcategory.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
 
             <div>
               <label>Marka:</label>

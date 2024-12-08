@@ -12,10 +12,12 @@ function AddProduct() {
   const [description, setDescription] = useState("");
   const [image_data, setImageFile] = useState(null); // Resim dosyası
   const [categorys, setCategorys] = useState([]);
+  const [subcategorys, setSubcategorys] = useState([]);
   const [trademarks, setTrademarks] = useState([]);
   const [variants, setVariants] = useState([]);
   const [additionalFeatures, setAdditionalFeatures] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [selectedTrademark, setSelectedTrademark] = useState("");
   const [selectedVariants, setSelectedVariants] = useState([]);
   const [selectedAdditionalFeatures, setSelectedAdditionalFeatures] = useState([]);
@@ -43,12 +45,22 @@ function AddProduct() {
     try {
       const categoryRes = await axios.get("http://localhost:5000/get-categorys");
       setCategorys(categoryRes.data);
+      const subcategoryRes = await axios.get("http://localhost:5000/get-subcategorys");
+      setSubcategorys(subcategoryRes.data);
       const trademarkRes = await axios.get("http://localhost:5000/get-trademarks");
       setTrademarks(trademarkRes.data);
       const additionalFeatureRes = await axios.get("http://localhost:5000/get-additionalfeatures");
       setAdditionalFeatures(additionalFeatureRes.data);
       const variantRes = await axios.get("http://localhost:5000/get-variants");
       setVariants(variantRes.data);
+    } catch (error) {
+      console.error("Dropdown verilerini alırken hata oluştu.", error);
+    }
+  };
+  const fetchDropdownSubCategoryData = async () => {
+    try {
+      const subcategoryRes = await axios.get("http://localhost:5000/get-subcategorys");
+      setSubcategorys(subcategoryRes.data);
     } catch (error) {
       console.error("Dropdown verilerini alırken hata oluştu.", error);
     }
@@ -73,6 +85,11 @@ const getVariantNames = (variantIds) => {
 
   return variantNames.length > 0 ? variantNames : <li>Bilinmeyen Varyant</li>; // Eğer variant bulunmazsa, bir varsayılan mesaj döner
 };
+const getSubcategoryName = (subcategoryId) => {
+  console.log(subcategorys);
+  const subcategory = subcategorys.find((subcat) => subcat.id === subcategoryId);
+  return subcategory ? subcategory.name : "Bilinmeyen Alt Kategori";
+};
 const getAdditionalFeatureNames = (featureIds) => {
   const featureNames = productAdditionalFeatures
     .filter((feature) => feature.product_id === featureIds.id) // Filtreleme yapıyoruz
@@ -80,6 +97,8 @@ const getAdditionalFeatureNames = (featureIds) => {
 
   return featureNames.length > 0 ? featureNames : <li>Bilinmeyen Özellik</li>; // Eğer özellik bulunmazsa, bir varsayılan mesaj döner
 };
+
+
 //#endregion
 
 //#region  handles
@@ -95,6 +114,7 @@ const handleSubmit = async (e) => {
     formErrors.discountRate = "İndirim oranı 0 ile 100 arasında olmalıdır.";
   if (!description) formErrors.description = "Açıklama gereklidir.";
   if (!selectedCategory) formErrors.selectedCategory = "Kategori seçilmelidir.";
+  if (!selectedSubcategory) formErrors.selectedSubcategory = "Alt kategori seçilmelidir.";
   if (!selectedTrademark) formErrors.selectedTrademark = "Marka seçilmelidir.";
   if (!image_data) formErrors.image_data = "Resim eklenmelidir.";
   if (image_data && !image_data.type.startsWith("image/")) {
@@ -117,6 +137,7 @@ const handleSubmit = async (e) => {
     formData.append("description", description);
     formData.append("category_id", selectedCategory);
     formData.append("trademark_id", selectedTrademark);
+    formData.append("subcategory_id", selectedSubcategory);
     formData.append("variants_id", JSON.stringify(selectedVariants));
     formData.append("additionalfeatures_id", JSON.stringify(selectedAdditionalFeatures));
 
@@ -130,6 +151,7 @@ const handleSubmit = async (e) => {
       description,
       selectedCategory,
       selectedTrademark,
+      selectedSubcategory,
       selectedVariants,
       selectedAdditionalFeatures,
     });
@@ -183,7 +205,14 @@ const handleAdditionalFeaturesCheckboxChange = (e) => {
     );
   }
 };
+const handleCategoryChange = (e) => {
+  setSelectedCategory(e.target.value);
+  setSelectedSubcategory(""); // Seçilen kategori değiştiğinde alt kategori sıfırlanır
+};
 
+const handleSubcategoryChange = (e) => {
+  setSelectedSubcategory(e.target.value);
+};
 
   const handleDelete = async (productId) => {
     try {
@@ -200,8 +229,37 @@ const handleAdditionalFeaturesCheckboxChange = (e) => {
 
   useEffect(() => {
     fetchDropdownData();
+    fetchDropdownSubCategoryData();
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const fetchAndFilterSubcategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/get-subcategorys");
+        const allSubcategories = response.data;
+  
+        console.log("Tüm alt kategoriler: ", allSubcategories);
+        console.log("Seçilen kategori ID: ", selectedCategory);
+  
+        // `selectedCategory` ve `subcategory.category_id` aynı tipte olduğundan emin olun
+        const filteredSubcategories = allSubcategories.filter(
+          (subcategory) => String(subcategory.category_id) === String(selectedCategory)
+        );
+  
+        console.log("Filtrelenmiş alt kategoriler: ", filteredSubcategories);
+  
+        setSubcategorys(filteredSubcategories);
+      } catch (error) {
+        console.error("Alt kategorileri çekme işlemi sırasında bir hata oluştu", error);
+      }
+    };
+  
+    if (selectedCategory) {
+      fetchAndFilterSubcategories();
+    }
+  }, [selectedCategory]);
+  
 
   const clearForm = () => {
     setName("");
@@ -267,15 +325,33 @@ const handleAdditionalFeaturesCheckboxChange = (e) => {
 
         <div className="form-group">
           <label>Kategori:</label>
-          <select onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory}>
-            <option value="categoryVal">Kategori Seçin</option>
+          <select
+            onChange={handleCategoryChange}
+            value={selectedCategory}
+          >
+            <option value="">Kategori Seçin</option>
             {categorys.map((category) => (
               <option key={category.ID} value={category.ID}>
                 {category.UrunAdi}
               </option>
             ))}
           </select>
-          {errors.selectedCategory && <span className="error">{errors.selectedCategory}</span>}
+        </div>
+
+        <div className="form-group">
+          <label>Alt Kategori:</label>
+          <select
+            onChange={handleSubcategoryChange}
+            value={selectedSubcategory}
+            disabled={!selectedCategory} // Eğer kategori seçilmezse alt kategori devre dışı
+          >
+            <option value="">Alt Kategori Seçin</option>
+            {subcategorys.map((subcategory) => (
+              <option key={subcategory.id} value={subcategory.id}>
+                {subcategory.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group">
@@ -341,48 +417,53 @@ const handleAdditionalFeaturesCheckboxChange = (e) => {
       </form>
       <h3>Mevcut Ürünler</h3>
   <div className="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Ürün Adı</th>
-          <th>Fiyat</th>
-          <th>Stok Kodu</th>
-          <th>Stok Miktarı</th>
-          <th>İndirim Oranı</th>
-          <th>İndirimli Fiyat</th>
-          <th>Açıklama</th>
-          <th>Kategori</th>
-          <th>Marka</th>
-          <th>Varyantlar</th>
-          <th>Ekstra Özellikler</th>
-          <th>Resim</th>
-          <th>İşlemler</th>
-        </tr>
-      </thead>
-      <tbody>
-        {products.map((product) => (
-          <tr key={product.id}>
-            <td>{product.name}</td>
-            <td>{product.price}₺</td>
-            <td>{product.stockCode}</td>
-            <td>{product.stockQuantity}</td>
-            <td>{product.discountRate}%</td>
-            <td>{calculateDiscountedPrice(product.price, product.discountRate)}₺</td>
-            <td>{product.description}</td>
-            <td>{getCategoryName(product.category_id)}</td>
-            <td>{getTrademarkName(product.trademark_id)}</td>
-            <td>{getVariantNames(product)}</td>
-            <td>{getAdditionalFeatureNames(product)}</td>
-            <td>
-              <img src={product.image_data} alt={product.name} />
-            </td>
-            <td>
-              <button onClick={() => handleDelete(product.id)} className="btn-delete">Sil</button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+  <table>
+  <thead>
+    <tr>
+      <th>Ürün Adı</th>
+      <th>Fiyat</th>
+      <th>Stok Kodu</th>
+      <th>Stok Miktarı</th>
+      <th>İndirim Oranı</th>
+      <th>İndirimli Fiyat</th>
+      <th>Açıklama</th>
+      <th>Kategori</th>
+      <th>Alt Kategori</th> {/* Yeni sütun */}
+      <th>Marka</th>
+      <th>Varyantlar</th>
+      <th>Ekstra Özellikler</th>
+      <th>Resim</th>
+      <th>İşlemler</th>
+    </tr>
+  </thead>
+  <tbody>
+    {products.map((product) => (
+      <tr key={product.id}>
+        <td>{product.name}</td>
+        <td>{product.price}₺</td>
+        <td>{product.stockCode}</td>
+        <td>{product.stockQuantity}</td>
+        <td>{product.discountRate}%</td>
+        <td>{calculateDiscountedPrice(product.price, product.discountRate)}₺</td>
+        <td>{product.description}</td>
+        <td>{getCategoryName(product.category_id)}</td>
+        <td>{getSubcategoryName(product.subcategory_id)}</td> {/* Yeni hücre */}
+        <td>{getTrademarkName(product.trademark_id)}</td>
+        <td>{getVariantNames(product)}</td>
+        <td>{getAdditionalFeatureNames(product)}</td>
+        <td>
+          <img src={product.image_data} alt={product.name} />
+        </td>
+        <td>
+          <button onClick={() => handleDelete(product.id)} className="btn-delete">
+            Sil
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
   </div>
     </div>
   );

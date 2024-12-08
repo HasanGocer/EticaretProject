@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useCart } from '../context/CartContext'; 
-import './Product.css'; // CSS dosyasını import ediyoruz.
+import { useCart } from "../context/CartContext";
+import './Product.css';
 
 const Product = () => {
   const { id } = useParams();
@@ -14,7 +14,7 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { addToCart } = useCart(); // Context'ten addToCart fonksiyonunu alıyoruz.
+  const { addToCart } = useCart();
 
   const fetchData = async () => {
     try {
