@@ -1,103 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import './AddCategory.css'; // CSS dosyasını buraya ekliyoruz
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  List,
+  ListItem,
+  IconButton,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import "./AddCategory.css"; // Dış CSS burada.
 
 function AddCategory() {
-  const [category, setCategory] = useState('');
-  const [subcategory, setSubcategory] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [message, setMessage] = useState('');
-  const [categorys, setCategorys] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
+  const [category, setCategory] = useState("");
+  const [subcategory, setSubcategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [message, setMessage] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubategories] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
 
-  // Bir kategoriyi tıklandığında aç/kapat
-  const toggleCategory = async (categoryId) => {
-    setExpandedCategories((prevState) => {
-      const isExpanded = prevState[categoryId];
-      const newExpandedState = {
-        ...prevState,
-        [categoryId]: !isExpanded,
-      };
-  
-      // Eğer kategori açılıyorsa alt kategorileri çek
-      if (!isExpanded) {
-
-        console.log(subcategories);
-      }
-  
-      return newExpandedState;
-    });
-  };
-
-  // Category ekleme
-  const handleCategorySubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:5000/add-category', { category });
-      setMessage(response.data.message);
-      fetchCategories(); // Refresh the categories list after adding a new one
-    } catch (error) {
-      setMessage('Bir hata oluştu.');
-    }
-  };
-
-  // Subcategory ekleme
-  const handleSubcategorySubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:5000/add-subcategory', { 
-        category_id: selectedCategory, 
-        name: subcategory 
-      });
-      setMessage(response.data.message);
-      fetchSubcategories();
-    } catch (error) {
-      setMessage('Bir hata oluştu.');
-    }
-  };
-
-  // Categories çekme
+  // Fetch kategorileri
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get-categorys');
-      setCategorys(response.data);
+      const response = await axios.get("http://localhost:5000/get-categorys");
+      setCategories(response.data);
     } catch (error) {
-      console.error('Kategoriler alınırken bir hata oluştu.', error);
+      console.error("Kategoriler alınırken bir hata oluştu", error);
     }
   };
 
-  // Subcategories çekme
+  // Alt Kategori çekme
   const fetchSubcategories = async (categoryId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/get-subcategorys`);
-      setSubcategories(response.data);
-      console.log(response.data);
+      const response = await axios.get(
+        "http://localhost:5000/get-subcategorys"
+      );
+      setSubategories(response.data);
     } catch (error) {
-      console.error('Alt kategoriler alınırken bir hata oluştu.', error);
-    }
-  };
-
-  // Category silme
-  const handleDeleteCategory = async (id) => {
-    try {
-      const response = await axios.delete(`http://localhost:5000/delete-category/${id}`);
-      setMessage(response.data.message);
-      fetchCategories(); // Refresh the categories list after deleting
-    } catch (error) {
-      setMessage('Kategori silinemedi.');
-    }
-  };
-
-  // Subcategory silme
-  const handleDeleteSubcategory = async (id) => {
-    try {
-      const response = await axios.delete(`http://localhost:5000/delete-subcategory/${id}`);
-      setMessage(response.data.message);
-      fetchSubcategories();
-    } catch (error) {
-      setMessage('Alt kategori silinemedi.');
+      console.error("Alt Kategoriler çekilirken hata oluştu", error);
     }
   };
 
@@ -106,106 +53,179 @@ function AddCategory() {
     fetchSubcategories();
   }, []);
 
+  const handleDeleteCategory = async (id) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:5000/delete-category/${id}`
+      );
+      console.log("Backend yanıtı:", response.data);
+      setMessage(response.data.message);
+      fetchCategories();
+    } catch (error) {
+      console.error("Silme işlemi sırasında hata:", error.response?.data);
+      if (error.response && error.response.data?.message) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage("Kategori silinirken beklenmeyen bir hata oluştu.");
+      }
+    }
+  };
+
+  const handleDeleteSubcategory = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/delete-subcategory/${id}`);
+      setMessage("Alt kategori silindi.");
+      fetchSubcategories();
+    } catch (error) {
+      setMessage("Alt kategori silinemedi.");
+    }
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:5000/add-category", {
+        category,
+      });
+      setMessage(response.data.message);
+      fetchCategories();
+    } catch (error) {
+      setMessage("Bir hata oluştu.");
+    }
+  };
+
+  const handleSubcategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/add-subcategory",
+        {
+          category_id: selectedCategory,
+          name: subcategory,
+        }
+      );
+      setMessage(response.data.message);
+      fetchSubcategories();
+    } catch (error) {
+      setMessage("Alt kategori eklenirken bir hata oluştu.");
+    }
+  };
+
+  const toggleExpandCategory = (categoryId) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoryId]: !prev[categoryId],
+    }));
+  };
+
   return (
-    <div className="container">
-      <h2 className="heading">Kategori ve Alt Kategori Yönetimi</h2>
+    <Box className="container">
+      <Typography variant="h4" className="heading">
+        Kategori ve Alt Kategori Yönetimi
+      </Typography>
       <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
+        <Button variant="contained" className="button">
+          Ana Sayfaya Dön
+        </Button>
       </Link>
 
-      {/* Kategori Ekleme Formu */}
-      <form className="form-wrapper" onSubmit={handleCategorySubmit}>
-        <div className="input-group">
-          <label>Kategori Adı:</label>
-          <input 
-            type="text" 
-            value={category} 
-            onChange={(e) => setCategory(e.target.value)} 
-            required 
+      {/* Yeni Kategori Formu */}
+      <Box className="form-wrapper">
+        <form onSubmit={handleCategorySubmit}>
+          <TextField
+            label="Kategori Adı"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
             className="input-field"
           />
-        </div>
-        <button type="submit" className="button">Kategori Ekle</button>
-      </form>
+          <Button type="submit" variant="contained" className="button">
+            Kategori Ekle
+          </Button>
+        </form>
+      </Box>
 
-      {/* Alt Kategori Ekleme Formu */}
-      <form className="form-wrapper" onSubmit={handleSubcategorySubmit}>
-        <div className="input-group">
-          <label>Kategori Seç:</label>
-          <select 
-            value={selectedCategory} 
-            onChange={(e) => setSelectedCategory(e.target.value)} 
-            required 
+      {/* Yeni Alt Kategori Formu */}
+      <Box className="form-wrapper">
+        <form onSubmit={handleSubcategorySubmit}>
+          <TextField
+            select
+            label="Kategori Seç"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
             className="input-field"
+            SelectProps={{
+              native: true,
+            }}
           >
-            <option value="" disabled>Bir kategori seçin</option>
-            {categorys.map((cat) => (
-              <option key={cat.ID} value={cat.ID}>{cat.UrunAdi}</option>
+            <option value="">Bir kategori seçin</option>
+            {categories.map((cat) => (
+              <option key={cat.ID} value={cat.ID}>
+                {cat.UrunAdi}
+              </option>
             ))}
-          </select>
-        </div>
-        <div className="input-group">
-          <label>Alt Kategori Adı:</label>
-          <input 
-            type="text" 
-            value={subcategory} 
-            onChange={(e) => setSubcategory(e.target.value)} 
-            required 
+          </TextField>
+          <TextField
+            label="Alt Kategori Adı"
+            value={subcategory}
+            onChange={(e) => setSubcategory(e.target.value)}
+            required
             className="input-field"
           />
-        </div>
-        <button type="submit" className="button">Alt Kategori Ekle</button>
-      </form>
+          <Button type="submit" variant="contained" className="button">
+            Alt Kategori Ekle
+          </Button>
+        </form>
+      </Box>
 
-      {message && <p className="message">{message}</p>}
+      {message && (
+        <Typography
+          variant="body1"
+          color="error"
+          align="center"
+          className="message"
+        >
+          {message}
+        </Typography>
+      )}
 
-      {/* Kategoriler ve Alt Kategoriler */}
-      <h3>Kategori Listesi</h3>
-      <ul className="category-list">
-        {categorys.map((cat) => (
-          <li key={cat.ID} className="category-item">
-            {/* Açılır/Kapanır Mantığı */}
-            <div 
-              className="category-header" 
-              onClick={() => toggleCategory(cat.ID)}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      {/* Kategorileri Listele */}
+      <Box>
+        {categories.map((category) => (
+          <Accordion
+            key={category.ID}
+            expanded={expandedCategories[category.ID] || false}
+            onChange={() => toggleExpandCategory(category.ID)}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls={`panel${category.ID}-content`}
             >
-              <span style={{ marginRight: '8px' }}>{expandedCategories[cat.ID] ? '-' : '+'}</span>
-              <span>{cat.UrunAdi}</span>
-            </div>
-            <button 
-              className="delete-button" 
-              onClick={() => handleDeleteCategory(cat.ID)}
-            >
-              Sil
-            </button>
-
-            {/* Alt Kategoriler Açıldığında */}
-            {expandedCategories[cat.ID]  && (
-              <div className="expanded-content">
-                {/* Alt kategoriler */}
-                <ul className="subcategory-list">
-                  {subcategories
-                    .filter((sub) => sub.category_id === cat.ID)
-                    .map((sub) => (
-                      <li key={sub.id} className="subcategory-item">
-                        <span>{sub.name}</span>
-                        <button 
-                          className="delete-button" 
-                          onClick={() => handleDeleteSubcategory(sub.id)}
-                        >
-                          Sil
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-                
-              </div>
-            )}
-          </li>
+              <Typography>{category.UrunAdi}</Typography>
+              <IconButton onClick={() => handleDeleteCategory(category.ID)}>
+                <Typography color="error">Sil</Typography>
+              </IconButton>
+            </AccordionSummary>
+            <AccordionDetails>
+              <List>
+                {subcategories
+                  .filter((sub) => sub.category_id === category.ID)
+                  .map((subcategory) => (
+                    <ListItem key={subcategory.id}>
+                      <Typography>{subcategory.name}</Typography>
+                      <IconButton
+                        onClick={() => handleDeleteSubcategory(subcategory.id)}
+                      >
+                        <Typography color="error">Sil</Typography>
+                      </IconButton>
+                    </ListItem>
+                  ))}
+              </List>
+            </AccordionDetails>
+          </Accordion>
         ))}
-      </ul>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

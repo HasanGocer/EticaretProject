@@ -1,44 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import './AddAdditionalFeature.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Paper,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+import "./AddAdditionalFeature.css";
 
 function AddAdditionalFeature() {
-  const [additionalfeature, setAdditionalfeature] = useState('');
-  const [message, setMessage] = useState('');
+  const [additionalfeature, setAdditionalfeature] = useState("");
+  const [message, setMessage] = useState("");
   const [additionalfeatures, setAdditionalFeatures] = useState([]);
 
-  // Additional Feature ekleme
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post('http://localhost:5000/add-additionalfeature', { additionalfeature });
+      const response = await axios.post(
+        "http://localhost:5000/add-additionalFeature", // Doğru URL
+        { additionalFeature: additionalfeature } // Gönderilen veri yapısı burada JSON objesi gibi olmalı
+      );
+      console.log(response.data);
       setMessage(response.data.message);
-      fetchAdditionalFeatures(); // Refresh the list after adding a new one
+      fetchAdditionalFeatures();
     } catch (error) {
-      setMessage('Bir hata oluştu.');
+      console.error("Backend'den dönen hata: ", error.response?.data);
+      setMessage("Bir hata oluştu.");
     }
   };
 
-  // Additional Features çekme
   const fetchAdditionalFeatures = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get-additionalfeatures');
+      const response = await axios.get(
+        "http://localhost:5000/get-additionalfeatures"
+      );
       setAdditionalFeatures(response.data);
     } catch (error) {
-      console.error('Additional features alınırken bir hata oluştu.', error);
+      console.error("Bir hata oluştu:", error);
     }
   };
 
-  // Additional Feature silme
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/delete-additionalfeature/${id}`);
+      const response = await axios.delete(
+        `http://localhost:5000/delete-additionalfeature/${id}`
+      );
       setMessage(response.data.message);
-      fetchAdditionalFeatures(); // Refresh the list after deleting
+      fetchAdditionalFeatures();
     } catch (error) {
-      setMessage('Additional Feature silinemedi.');
+      setMessage("Silme işlemi başarısız.");
     }
   };
 
@@ -47,38 +65,67 @@ function AddAdditionalFeature() {
   }, []);
 
   return (
-    <div className="container">
-      <h2 className="heading">Additional Feature Ekle</h2>
-      <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
-      </Link>
+    <Box className="container" p={3}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Additional Feature Yönetimi
+      </Typography>
 
-      <form className="form-wrapper" onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label>Additional Feature Adı:</label>
-          <input 
-            type="text" 
-            value={additionalfeature} 
-            onChange={(e) => setAdditionalfeature(e.target.value)} 
-            required 
-            className="input-field"
+      <Button
+        variant="contained"
+        color="primary"
+        component={Link}
+        to="/admin"
+        sx={{ mb: 3 }}
+      >
+        Ana Sayfaya Dön
+      </Button>
+
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Additional Feature Adı"
+            variant="outlined"
+            fullWidth
+            value={additionalfeature}
+            onChange={(e) => setAdditionalfeature(e.target.value)}
+            required
+            sx={{ mb: 2 }}
           />
-        </div>
-        <button type="submit" className="button">Ekle</button>
-      </form>
+          <Button type="submit" variant="contained" color="secondary" fullWidth>
+            Ekle
+          </Button>
+        </form>
+      </Paper>
 
-      {message && <p className="message">{message}</p>}
+      {message && (
+        <Typography color="error" align="center" gutterBottom>
+          {message}
+        </Typography>
+      )}
 
-      <h3>Additional Feature Listesi</h3>
-      <ul className="additional-feature-list">
+      <Typography variant="h6" gutterBottom>
+        Mevcut Additional Feature Listesi
+      </Typography>
+
+      <List>
         {additionalfeatures.map((feature) => (
-          <li key={feature.ID} className="additional-feature-item">
-            <span>{feature.UrunAdi}</span>
-            <button className="delete-button" onClick={() => handleDelete(feature.ID)}>Sil</button>
-          </li>
+          <ListItem
+            key={feature.ID}
+            secondaryAction={
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={() => handleDelete(feature.ID)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            }
+          >
+            <ListItemText primary={feature.UrunAdi} />
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+    </Box>
   );
 }
 

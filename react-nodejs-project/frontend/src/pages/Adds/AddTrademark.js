@@ -1,84 +1,162 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import './AddTrademark.css';  // CSS dosyasını burada dahil ediyoruz
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./AddTrademark.css";
+import { Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  List,
+  ListItem,
+  IconButton,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 function AddTrademark() {
-  const [trademark, setTrademark] = useState('');
-  const [message, setMessage] = useState('');
+  const [trademark, setTrademark] = useState("");
+  const [message, setMessage] = useState("");
   const [trademarks, setTrademarks] = useState([]);
 
-  // Trademark ekleme
+  // Yeni trademark ekleme
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post('http://localhost:5000/add-trademark', { trademark });
+      const response = await axios.post("http://localhost:5000/add-trademark", {
+        trademark,
+      });
       setMessage(response.data.message);
-      fetchTrademarks(); // Refresh the trademarks list after adding a new one
+      fetchTrademarks();
     } catch (error) {
-      setMessage('Bir hata oluştu.');
+      setMessage("Bir hata oluştu.");
     }
   };
 
-  // Trademarkları çekme
+  // Trademark listesini çek
   const fetchTrademarks = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get-trademarks');
+      const response = await axios.get("http://localhost:5000/get-trademarks");
       setTrademarks(response.data);
     } catch (error) {
-      console.error('Trademarkları alırken bir hata oluştu.', error);
+      console.error("Trademarkları alırken bir hata oluştu.", error);
     }
   };
 
-  // Trademark silme
+  // Trademark silme işlemi
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/delete-trademark/${id}`);
+      const response = await axios.delete(
+        `http://localhost:5000/delete-trademark/${id}`
+      );
       setMessage(response.data.message);
-      fetchTrademarks(); // Refresh the trademarks list after deleting
+      fetchTrademarks();
     } catch (error) {
-      setMessage('Trademark silinemedi.');
+      setMessage("Silme işlemi başarısız.");
     }
   };
 
+  // Sayfa yüklenirken marka listesini çek
   useEffect(() => {
     fetchTrademarks();
   }, []);
 
   return (
-    <div className="container">
-      <h2 className="heading">Trademark Ekle</h2>
-      <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
-      </Link>
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        p: 3,
+        bgcolor: "white",
+        borderRadius: "8px",
+        boxShadow: 3,
+      }}
+    >
+      {/* Sayfa Başlığı */}
+      <Typography variant="h4" align="center" gutterBottom>
+        Trademark Yönetimi
+      </Typography>
 
-      <form className="form-wrapper" onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label>Trademark Adı:</label>
-          <input 
-            type="text" 
-            value={trademark} 
-            onChange={(e) => setTrademark(e.target.value)} 
-            required 
-            className="input-field"
-          />
-        </div>
-        <button type="submit" className="button">Ekle</button>
-      </form>
+      {/* Ana sayfaya yönlendirme butonu */}
+      <Box sx={{ textAlign: "center", mb: 3 }}>
+        <Button
+          variant="contained"
+          color="success"
+          component={Link}
+          to="/admin"
+        >
+          Ana Sayfaya Dön
+        </Button>
+      </Box>
 
-      {message && <p className="message">{message}</p>}
+      {/* Yeni Trademark Ekleme Formu */}
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}
+      >
+        <TextField
+          label="Yeni Trademark"
+          variant="outlined"
+          value={trademark}
+          onChange={(e) => setTrademark(e.target.value)}
+          required
+        />
+        <Button variant="contained" color="success" type="submit">
+          Ekle
+        </Button>
+      </Box>
 
-      <h3>Trademark Listesi</h3>
-      <ul className="trademark-list">
-        {trademarks.map((trademark) => (
-          <li key={trademark.ID} className="trademark-item">
-            <span>{trademark.UrunAdi}</span>
-            <button className="delete-button" onClick={() => handleDelete(trademark.ID)}>Sil</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      {message && (
+        <Typography variant="body1" align="center" color="error" gutterBottom>
+          {message}
+        </Typography>
+      )}
+
+      {/* Trademark Listeleme Alanı */}
+      <Typography variant="h6" gutterBottom>
+        Trademark Listesi
+      </Typography>
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="trademark-content"
+          id="trademark-header"
+        >
+          <Typography>Tüm Trademark'ları Görüntüle</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <List sx={{ width: "100%" }}>
+            {trademarks.map((trademark) => (
+              <ListItem
+                key={trademark.ID}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  p: 1,
+                  mb: 1,
+                }}
+              >
+                <Typography>{trademark.UrunAdi}</Typography>
+                <IconButton
+                  color="error"
+                  onClick={() => handleDelete(trademark.ID)}
+                  aria-label="Sil"
+                >
+                  🗑️
+                </IconButton>
+              </ListItem>
+            ))}
+          </List>
+        </AccordionDetails>
+      </Accordion>
+    </Box>
   );
 }
 

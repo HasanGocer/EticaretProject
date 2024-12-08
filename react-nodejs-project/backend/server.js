@@ -179,7 +179,6 @@ app.put("/update-order/:id", (req, res) => {
     }
   );
 });
-
 app.get("/orders", (req, res) => {
   db.query("SELECT * FROM orders", (err, results) => {
     if (err) {
@@ -210,8 +209,74 @@ app.get("/orders/:userId", (req, res) => {
 });
 
 //#endregion
+//#region additionalfeature
+app.post("/add-additionalFeature", (req, res) => {
+  console.log("Backend'e gelen JSON: ", req.body);
 
-//#region  add
+  const { additionalFeature } = req.body;
+
+  if (!additionalFeature) {
+    return res.status(400).send({ message: "Gönderilen veri eksik!" });
+  }
+
+  const sql = "INSERT INTO additionalFeatures (UrunAdi) VALUES (?)";
+  db.query(sql, [additionalFeature], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send({ message: "Sunucu hatası" });
+    }
+
+    res.status(200).send({ message: "Fiyat başarıyla kaydedildi!" });
+  });
+});
+app.get("/get-additionalfeatures", (req, res) => {
+  const query = "SELECT * FROM additionalfeatures";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Ekstra özellikleri alma hatası:", err);
+      return res.status(500).json({ message: "Ekstra özellikler alınamadı." });
+    }
+    res.status(200).json(results);
+  });
+});
+app.put("/update-additionalfeature/:id", async (req, res) => {
+  const { id } = req.params; // URL'den gelen ID
+  const { UrunAdi } = req.body; // İstek gövdesinden gelen yeni ad
+
+  if (!id || !UrunAdi) {
+    return res.status(400).json({ message: "ID ve UrunAdi gerekli." });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE additionalfeatures SET UrunAdi = ? WHERE ID = ?",
+      [UrunAdi, id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "additionalfeature başarıyla güncellendi." });
+    } else {
+      res.status(404).json({ message: "additionalfeature bulunamadı." });
+    }
+  } catch (error) {
+    console.error("additionalfeature güncellenirken hata:", error.message);
+    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
+  }
+});
+app.delete("/delete-additionalFeature/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = "DELETE FROM additionalFeatures WHERE id = ?";
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Ürün silme hatası:", err);
+      return res.status(500).json({ message: "Ürün silinemedi." });
+    }
+    res.status(200).json({ message: "Ürün başarıyla silindi." });
+  });
+});
+//#endregion
+//#region product
 app.post("/add-product", upload.single("image_data"), (req, res) => {
   const {
     name,
@@ -296,95 +361,6 @@ app.post("/add-product", upload.single("image_data"), (req, res) => {
     }
   );
 });
-
-app.post("/add-variant", (req, res) => {
-  const { variant } = req.body;
-
-  if (!variant) {
-    return res.status(400).json({ message: "varyant gereklidir." });
-  }
-
-  const query = "INSERT INTO variants (UrunAdi) VALUES (?)";
-  db.query(query, [variant], (err, result) => {
-    if (err) {
-      console.error("Ürün ekleme hatası:", err);
-      return res.status(500).json({ message: "Veritabanına ürün eklenemedi." });
-    }
-    res
-      .status(200)
-      .json({ message: "Ürün başarıyla eklendi.", productId: result.insertId });
-  });
-});
-app.post("/add-category", (req, res) => {
-  const { category } = req.body;
-  const sql = "INSERT INTO categorys (UrunAdi) VALUES (?)";
-  db.query(sql, [category], (err, result) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send("Fiyat başarıyla kaydedildi!");
-    }
-  });
-});
-app.post("/add-subcategory", (req, res) => {
-  const { category_id, name } = req.body;
-
-  // Eksik veri kontrolü
-  if (!category_id || !name) {
-    return res.status(400).json({ message: "Eksik bilgi gönderildi." });
-  }
-
-  // SQL sorgusunu çalıştır
-  const query = "INSERT INTO subcategorys (category_id, name) VALUES (?, ?)";
-
-  db.execute(query, [category_id, name], (err, result) => {
-    if (err) {
-      console.error("Veritabanına veri eklenirken hata: ", err);
-      return res
-        .status(500)
-        .json({ message: "Veritabanına veri eklenirken hata oluştu." });
-    }
-
-    res.status(201).json({ message: "Alt kategori başarıyla eklendi." });
-  });
-});
-
-app.post("/add-additionalFeature", (req, res) => {
-  const { additionalFeature } = req.body;
-  const sql = "INSERT INTO additionalFeatures (UrunAdi) VALUES (?)";
-  db.query(sql, [additionalFeature], (err, result) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send("Fiyat başarıyla kaydedildi!");
-    }
-  });
-});
-app.post("/add-variant", (req, res) => {
-  const { variant } = req.body;
-  const sql = "INSERT INTO variants (UrunAdi) VALUES (?)";
-  db.query(sql, [variant], (err, result) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send("Fiyat başarıyla kaydedildi!");
-    }
-  });
-});
-app.post("/add-trademark", (req, res) => {
-  const { trademark } = req.body;
-  const sql = "INSERT INTO trademarks (UrunAdi) VALUES (?)";
-  db.query(sql, [trademark], (err, result) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send("Fiyat başarıyla kaydedildi!");
-    }
-  });
-});
-//#endregion
-
-//#region get
 app.get("/get-products", (req, res) => {
   const query = "SELECT * FROM products";
   db.query(query, (err, results) => {
@@ -410,7 +386,6 @@ app.get("/get-product-additionalfeatures", (req, res) => {
     res.status(200).json(results);
   });
 });
-
 app.get("/get-product-variants", (req, res) => {
   const query = `
     SELECT p.id AS product_id, p.name AS product_name, v.UrunAdi AS variant_name
@@ -426,66 +401,6 @@ app.get("/get-product-variants", (req, res) => {
     res.status(200).json(results);
   });
 });
-
-// Kategorileri, markaları, özellikleri ve varyantları almak için API endpoint'leri
-app.get("/get-variants", (req, res) => {
-  const query = "SELECT * FROM variants";
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Varyantları alma hatası:", err);
-      return res.status(500).json({ message: "Varyantlar alınamadı." });
-    }
-    res.status(200).json(results);
-  });
-});
-
-app.get("/get-trademarks", (req, res) => {
-  const query = "SELECT * FROM trademarks";
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Trademarkları alma hatası:", err);
-      return res.status(500).json({ message: "Trademarklar alınamadı." });
-    }
-    res.status(200).json(results);
-  });
-});
-
-app.get("/get-categorys", (req, res) => {
-  const query = "SELECT * FROM categorys";
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Kategorileri alma hatası:", err);
-      return res.status(500).json({ message: "Kategoriler alınamadı." });
-    }
-    res.status(200).json(results);
-  });
-});
-app.get("/get-subcategorys", (req, res) => {
-  const query = "SELECT * FROM subcategorys";
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Alt kategoriler çekilirken bir hata oluştu:", err);
-      res.status(500).send("Bir hata oluştu.");
-    } else {
-      res.status(200).json(results);
-    }
-  });
-});
-
-app.get("/get-additionalfeatures", (req, res) => {
-  const query = "SELECT * FROM additionalfeatures";
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Ekstra özellikleri alma hatası:", err);
-      return res.status(500).json({ message: "Ekstra özellikler alınamadı." });
-    }
-    res.status(200).json(results);
-  });
-});
-//#endregion
-
-//#region update
 app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
   const {
     name,
@@ -595,56 +510,110 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
     res.status(200).json({ message: "Ürün başarıyla güncellendi." });
   });
 });
+app.delete("/delete-product/:id", (req, res) => {
+  const { id } = req.params;
 
-app.put("/update-additionalfeature/:id", async (req, res) => {
-  const { id } = req.params; // URL'den gelen ID
-  const { UrunAdi } = req.body; // İstek gövdesinden gelen yeni ad
+  // 1. Öncelikle product_additionalfeatures'tan kayıtları sil
+  db.query(
+    "DELETE FROM product_additionalfeatures WHERE product_id = ?",
+    [id],
+    (err) => {
+      if (err) {
+        console.error("Ekstra özellikler silinirken hata:", err);
+        return res
+          .status(500)
+          .json({ message: "Ekstra özellikler silinemedi." });
+      }
 
-  if (!id || !UrunAdi) {
-    return res.status(400).json({ message: "ID ve UrunAdi gerekli." });
-  }
+      // 2. Sonra product_variants'tan kayıtları sil
+      db.query(
+        "DELETE FROM product_variants WHERE product_id = ?",
+        [id],
+        (err) => {
+          if (err) {
+            console.error("Varyantlar silinirken hata:", err);
+            return res.status(500).json({ message: "Varyantlar silinemedi." });
+          }
 
-  try {
-    const result = await db.query(
-      "UPDATE additionalfeatures SET UrunAdi = ? WHERE ID = ?",
-      [UrunAdi, id]
-    );
+          // 3. Son olarak products tablosundan ürünü sil
+          db.query("DELETE FROM products WHERE id = ?", [id], (err) => {
+            if (err) {
+              console.error("Ürün silme hatası:", err);
+              return res.status(500).json({ message: "Ürün silinemedi." });
+            }
 
-    if (result.affectedRows > 0) {
-      res.json({ message: "additionalfeature başarıyla güncellendi." });
-    } else {
-      res.status(404).json({ message: "additionalfeature bulunamadı." });
+            res.status(200).json({ message: "Ürün başarıyla silindi." });
+          });
+        }
+      );
     }
-  } catch (error) {
-    console.error("additionalfeature güncellenirken hata:", error.message);
-    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
-  }
+  );
 });
-app.put("/update-trademark/:id", async (req, res) => {
-  const { id } = req.params; // URL'den gelen ID
-  const { UrunAdi } = req.body; // İstek gövdesinden gelen yeni ad
+//#endregion
+//#region variant
+app.post("/add-variant", (req, res) => {
+  const { variant } = req.body;
 
-  if (!id || !UrunAdi) {
-    return res.status(400).json({ message: "ID ve UrunAdi gerekli." });
+  if (!variant) {
+    return res.status(400).json({ message: "varyant gereklidir." });
   }
 
-  try {
-    const result = await db.query(
-      "UPDATE trademarks SET UrunAdi = ? WHERE ID = ?",
-      [UrunAdi, id]
-    );
-
-    if (result.affectedRows > 0) {
-      res.json({ message: "Trademark başarıyla güncellendi." });
-    } else {
-      res.status(404).json({ message: "Trademark bulunamadı." });
+  const query = "INSERT INTO variants (UrunAdi) VALUES (?)";
+  db.query(query, [variant], (err, result) => {
+    if (err) {
+      console.error("Ürün ekleme hatası:", err);
+      return res.status(500).json({ message: "Veritabanına ürün eklenemedi." });
     }
-  } catch (error) {
-    console.error("Trademark güncellenirken hata:", error.message);
-    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
-  }
+    res
+      .status(200)
+      .json({ message: "Ürün başarıyla eklendi.", productId: result.insertId });
+  });
 });
+app.get("/get-variants", (req, res) => {
+  const query = "SELECT * FROM variants";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Varyantları alma hatası:", err);
+      return res.status(500).json({ message: "Varyantlar alınamadı." });
+    }
+    res.status(200).json(results);
+  });
+});
+app.delete("/delete-variant/:id", (req, res) => {
+  const { id } = req.params;
 
+  const query = "DELETE FROM variants WHERE id = ?";
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Ürün silme hatası:", err);
+      return res.status(500).json({ message: "Ürün silinemedi." });
+    }
+    res.status(200).json({ message: "Ürün başarıyla silindi." });
+  });
+});
+//#endregion
+//#region category
+app.post("/add-category", (req, res) => {
+  const { category } = req.body;
+  const sql = "INSERT INTO categorys (UrunAdi) VALUES (?)";
+  db.query(sql, [category], (err, result) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(200).send("Fiyat başarıyla kaydedildi!");
+    }
+  });
+});
+app.get("/get-categorys", (req, res) => {
+  const query = "SELECT * FROM categorys";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Kategorileri alma hatası:", err);
+      return res.status(500).json({ message: "Kategoriler alınamadı." });
+    }
+    res.status(200).json(results);
+  });
+});
 app.put("/update-category/:id", async (req, res) => {
   const { id } = req.params; // URL'den gelen ID
   const { UrunAdi } = req.body; // İstek gövdesinden gelen yeni ad
@@ -668,6 +637,77 @@ app.put("/update-category/:id", async (req, res) => {
     console.error("Kategori güncellenirken hata:", error.message);
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
+});
+app.delete("/delete-category/:id", (req, res) => {
+  const { id } = req.params;
+
+  // Alt kategorileri sil
+  const deleteSubcategoriesQuery =
+    "DELETE FROM subcategorys WHERE category_id = ?";
+
+  db.query(deleteSubcategoriesQuery, [id], (err, result) => {
+    if (err) {
+      console.error("Alt kategoriler silinirken hata:", err);
+      return res
+        .status(500)
+        .json({ message: "Alt kategoriler silinirken hata oluştu." });
+    }
+
+    console.log(`Silinen alt kategorilerin sayısı: ${result.affectedRows}`);
+
+    // Üst kategoriyi sil
+    const deleteCategoryQuery = "DELETE FROM categorys WHERE id = ?";
+    db.query(deleteCategoryQuery, [id], (err, result) => {
+      if (err) {
+        console.error("Kategori silinirken hata:", err);
+        return res
+          .status(500)
+          .json({ message: "Kategori silinirken hata oluştu." });
+      }
+
+      console.log("Üst kategori başarıyla silindi.");
+      res
+        .status(200)
+        .json({ message: "Kategori ve alt kategoriler başarıyla silindi." });
+    });
+  });
+});
+
+//#endregion
+//#region subcategory
+app.post("/add-subcategory", (req, res) => {
+  const { category_id, name } = req.body;
+
+  // Eksik veri kontrolü
+  if (!category_id || !name) {
+    return res.status(400).json({ message: "Eksik bilgi gönderildi." });
+  }
+
+  // SQL sorgusunu çalıştır
+  const query = "INSERT INTO subcategorys (category_id, name) VALUES (?, ?)";
+
+  db.execute(query, [category_id, name], (err, result) => {
+    if (err) {
+      console.error("Veritabanına veri eklenirken hata: ", err);
+      return res
+        .status(500)
+        .json({ message: "Veritabanına veri eklenirken hata oluştu." });
+    }
+
+    res.status(201).json({ message: "Alt kategori başarıyla eklendi." });
+  });
+});
+app.get("/get-subcategorys", (req, res) => {
+  const query = "SELECT * FROM subcategorys";
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Alt kategoriler çekilirken bir hata oluştu:", err);
+      res.status(500).send("Bir hata oluştu.");
+    } else {
+      res.status(200).json(results);
+    }
+  });
 });
 app.put("/update-subcategory/:id", async (req, res) => {
   const { id } = req.params;
@@ -707,46 +747,6 @@ app.put("/update-subcategory/:id", async (req, res) => {
       .json({ message: "Sunucu tarafında beklenmeyen bir hata oluştu." });
   }
 });
-
-//#endregion
-
-//#region  delete
-app.delete("/delete-product/:id", (req, res) => {
-  const { id } = req.params;
-
-  const query = "DELETE FROM products WHERE id = ?";
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Ürün silme hatası:", err);
-      return res.status(500).json({ message: "Ürün silinemedi." });
-    }
-    res.status(200).json({ message: "Ürün başarıyla silindi." });
-  });
-});
-app.delete("/delete-variant/:id", (req, res) => {
-  const { id } = req.params;
-
-  const query = "DELETE FROM variants WHERE id = ?";
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Ürün silme hatası:", err);
-      return res.status(500).json({ message: "Ürün silinemedi." });
-    }
-    res.status(200).json({ message: "Ürün başarıyla silindi." });
-  });
-});
-app.delete("/delete-category/:id", (req, res) => {
-  const { id } = req.params;
-
-  const query = "DELETE FROM categorys WHERE id = ?";
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Ürün silme hatası:", err);
-      return res.status(500).json({ message: "Ürün silinemedi." });
-    }
-    res.status(200).json({ message: "Ürün başarıyla silindi." });
-  });
-});
 app.delete("/delete-subcategory/:id", (req, res) => {
   const { id } = req.params; // URL parametresinden id alıyoruz
 
@@ -767,18 +767,52 @@ app.delete("/delete-subcategory/:id", (req, res) => {
     res.status(200).send({ message: "Subcategory başarıyla silindi!" });
   });
 });
-
-app.delete("/delete-additionalFeature/:id", (req, res) => {
-  const { id } = req.params;
-
-  const query = "DELETE FROM additionalFeatures WHERE id = ?";
-  db.query(query, [id], (err, result) => {
+//#endregion
+//#region trademark
+app.post("/add-trademark", (req, res) => {
+  const { trademark } = req.body;
+  const sql = "INSERT INTO trademarks (UrunAdi) VALUES (?)";
+  db.query(sql, [trademark], (err, result) => {
     if (err) {
-      console.error("Ürün silme hatası:", err);
-      return res.status(500).json({ message: "Ürün silinemedi." });
+      res.status(500).send(err);
+    } else {
+      res.status(200).send("Fiyat başarıyla kaydedildi!");
     }
-    res.status(200).json({ message: "Ürün başarıyla silindi." });
   });
+});
+app.get("/get-trademarks", (req, res) => {
+  const query = "SELECT * FROM trademarks";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Trademarkları alma hatası:", err);
+      return res.status(500).json({ message: "Trademarklar alınamadı." });
+    }
+    res.status(200).json(results);
+  });
+});
+app.put("/update-trademark/:id", async (req, res) => {
+  const { id } = req.params; // URL'den gelen ID
+  const { UrunAdi } = req.body; // İstek gövdesinden gelen yeni ad
+
+  if (!id || !UrunAdi) {
+    return res.status(400).json({ message: "ID ve UrunAdi gerekli." });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE trademarks SET UrunAdi = ? WHERE ID = ?",
+      [UrunAdi, id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Trademark başarıyla güncellendi." });
+    } else {
+      res.status(404).json({ message: "Trademark bulunamadı." });
+    }
+  } catch (error) {
+    console.error("Trademark güncellenirken hata:", error.message);
+    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
+  }
 });
 app.delete("/delete-trademark/:id", (req, res) => {
   const { id } = req.params;
