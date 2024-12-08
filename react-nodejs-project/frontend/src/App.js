@@ -25,6 +25,7 @@ import Login from './pages/Registration/Login';
 import Register from './pages/Registration/Register';
 import Profile from './pages/Registration/Profile';
 import EditUsers from './pages/Registration/EditUsers';
+import EditOrder from './pages/Orders/EditOrder';
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/Payment" element={<Payment />} />
               <Route path="/order" element={<Order />} />
+              <Route path="/admin/EditOrder" element={<EditOrder />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
