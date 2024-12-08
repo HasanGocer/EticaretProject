@@ -33,7 +33,7 @@ const Order = () => {
   // Sipariş çekme işlemi
   useEffect(() => {
     if (!AuthService.getCurrentUser()) {
-      navigate("/login"); // Profil sayfasına yönlendir
+      navigate("/login"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
     } else {
       const fetchOrders = async () => {
         try {
@@ -141,7 +141,7 @@ const Order = () => {
               ))
             ) : (
               <Grid item xs={12}>
-                <Typography textAlign="center">
+                <Typography textAlign="center" mt={2}>
                   Sipariş bulunmamaktadır.
                 </Typography>
               </Grid>

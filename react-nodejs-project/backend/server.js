@@ -202,12 +202,9 @@ app.get("/orders/:userId", (req, res) => {
           .status(500)
           .json({ message: "Siparişler çekilirken bir hata oluştu." });
       }
-      if (results.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "Bu kullanıcı için sipariş bulunamadı." });
-      }
-      res.status(200).json(results);
+
+      // Eğer sonuç boşsa, boş bir dizi döndür
+      res.status(200).json(results || []);
     }
   );
 });
