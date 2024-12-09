@@ -348,11 +348,7 @@ function AddProduct() {
       <Typography variant="h4" gutterBottom>
         Ürün Ekle
       </Typography>
-      <Link to="/admin">
-        <Button variant="contained" className="button">
-          Ana Sayfaya Dön
-        </Button>
-      </Link>
+
       <form onSubmit={handleSubmit}>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>

@@ -46,9 +46,6 @@ function EditTrademark() {
   return (
     <div className="container">
       <h2 className="heading">Trademark Düzenle</h2>
-      <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
-      </Link>
 
       {message && <p className="message">{message}</p>}
 
@@ -87,10 +84,7 @@ function EditTrademark() {
               <button className="button" onClick={updateTrademark}>
                 Kaydet
               </button>
-              <button
-                className="button cancel-button"
-                onClick={closeEditModal}
-              >
+              <button className="button cancel-button" onClick={closeEditModal}>
                 İptal
               </button>
             </div>

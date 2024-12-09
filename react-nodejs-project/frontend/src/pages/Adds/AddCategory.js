@@ -123,11 +123,6 @@ function AddCategory() {
       <Typography variant="h4" className="heading">
         Kategori ve Alt Kategori Yönetimi
       </Typography>
-      <Link to="/admin">
-        <Button variant="contained" className="button">
-          Ana Sayfaya Dön
-        </Button>
-      </Link>
 
       {/* Yeni Kategori Formu */}
       <Box className="form-wrapper">

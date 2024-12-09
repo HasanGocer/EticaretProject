@@ -80,18 +80,6 @@ function AddTrademark() {
         Trademark Yönetimi
       </Typography>
 
-      {/* Ana sayfaya yönlendirme butonu */}
-      <Box sx={{ textAlign: "center", mb: 3 }}>
-        <Button
-          variant="contained"
-          color="success"
-          component={Link}
-          to="/admin"
-        >
-          Ana Sayfaya Dön
-        </Button>
-      </Box>
-
       {/* Yeni Trademark Ekleme Formu */}
       <Box
         component="form"

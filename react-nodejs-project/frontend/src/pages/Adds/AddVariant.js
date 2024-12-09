@@ -74,16 +74,6 @@ function AddVariant() {
         Varyant Ekle
       </Typography>
 
-      <Button
-        component={Link}
-        to="/admin"
-        variant="contained"
-        color="success"
-        sx={{ marginBottom: "20px", width: "100%" }}
-      >
-        Ana Sayfaya Dön
-      </Button>
-
       {message && (
         <Alert severity="info" sx={{ marginBottom: "20px" }}>
           {message}

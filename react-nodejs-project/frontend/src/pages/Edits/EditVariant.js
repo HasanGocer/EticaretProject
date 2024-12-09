@@ -46,9 +46,6 @@ function EditVariant() {
   return (
     <div className="container">
       <h2 className="heading">Varyant Düzenle</h2>
-      <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
-      </Link>
 
       {message && <p className="message">{message}</p>}
 
@@ -76,7 +73,10 @@ function EditVariant() {
               type="text"
               value={editingVariant.UrunAdi}
               onChange={(e) =>
-                setEditingVariant({ ...editingVariant, UrunAdi: e.target.value })
+                setEditingVariant({
+                  ...editingVariant,
+                  UrunAdi: e.target.value,
+                })
               }
               className="input-field"
             />

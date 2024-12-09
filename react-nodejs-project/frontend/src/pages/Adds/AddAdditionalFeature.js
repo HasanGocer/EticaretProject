@@ -70,16 +70,6 @@ function AddAdditionalFeature() {
         Additional Feature Yönetimi
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        component={Link}
-        to="/admin"
-        sx={{ mb: 3 }}
-      >
-        Ana Sayfaya Dön
-      </Button>
-
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <form onSubmit={handleSubmit}>
           <TextField

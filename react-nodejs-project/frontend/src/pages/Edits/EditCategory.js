@@ -29,7 +29,7 @@ function EditCategory() {
       setSubcategories(response.data);
 
       const initialEditingSubcategories = {};
-      response.data.forEach(sub => {
+      response.data.forEach((sub) => {
         initialEditingSubcategories[sub.id] = { name: sub.name };
       });
       setEditingSubcategories(initialEditingSubcategories);
@@ -41,7 +41,12 @@ function EditCategory() {
   // Alt kategori güncelle
   const updateSubcategory = async (id) => {
     try {
-      console.log("Updating subcategory with id:", id, "name:", editingSubcategories[id]?.name);
+      console.log(
+        "Updating subcategory with id:",
+        id,
+        "name:",
+        editingSubcategories[id]?.name
+      );
 
       const response = await axios.put(
         `http://localhost:5000/update-subcategory/${id}`,
@@ -68,7 +73,7 @@ function EditCategory() {
       setMessage("Kategori güncellenirken bir hata oluştu.");
     }
   };
-  
+
   const closeEditCategoryModal = () => {
     setEditingCategory(null);
   };
@@ -87,9 +92,6 @@ function EditCategory() {
   return (
     <div className="container">
       <h2 className="heading">Kategori Düzenle</h2>
-      <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
-      </Link>
 
       {message && <p className="message">{message}</p>}
 
@@ -128,7 +130,7 @@ function EditCategory() {
               className="input-field"
             />
             <div className="modal-actions">
-            <button className="button" onClick={updateCategory}>
+              <button className="button" onClick={updateCategory}>
                 Kaydet
               </button>
               <button
@@ -140,23 +142,26 @@ function EditCategory() {
             </div>
             <h4>Alt Kategoriler</h4>
             <ul className="subcategory-list">
-              {subcategories.filter((sub) => sub.category_id === editingCategory.ID)
+              {subcategories
+                .filter((sub) => sub.category_id === editingCategory.ID)
                 .map((sub) => (
-                <li key={sub.id} className="subcategory-item">
-                  <input
-                    type="text"
-                    value={editingSubcategories[sub.id]?.name || sub.name}
-                    onChange={(e) => handleSubcategoryChange(sub.id, e.target.value)}
-                    className="input-field"
-                  />
-                  <button
-                    className="button"
-                    onClick={() => updateSubcategory(sub.id)}
-                  >
-                    Kaydet
-                  </button>
-                </li>
-              ))}
+                  <li key={sub.id} className="subcategory-item">
+                    <input
+                      type="text"
+                      value={editingSubcategories[sub.id]?.name || sub.name}
+                      onChange={(e) =>
+                        handleSubcategoryChange(sub.id, e.target.value)
+                      }
+                      className="input-field"
+                    />
+                    <button
+                      className="button"
+                      onClick={() => updateSubcategory(sub.id)}
+                    >
+                      Kaydet
+                    </button>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
