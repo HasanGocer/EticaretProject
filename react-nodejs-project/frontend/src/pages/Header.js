@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import { useCart } from "../context/CartContext";
 import { FaShoppingCart } from "react-icons/fa";
+import logo from "./AdAstraYazLogo.png";
 import axios from "axios";
 import "./Header.css";
 import {
@@ -146,12 +147,27 @@ const Header = ({ bannerVisible, closeBanner }) => {
         </div>
       )}
       <header className="fixedHeader">
-        <div className="logo">
-          <a href="/">🌟 TuruncuShop</a>
+        <div
+          className="logo"
+          style={{
+            top: "0%",
+            height: "100vh",
+          }}
+        >
+          <img
+            src={logo}
+            alt="Ad Astra Yazılım Logo"
+            style={{
+              filter: "invert(100%) grayscale(100%)",
+              maxWidth: "300px",
+              mainWidth: "300px",
+              height: "auto",
+            }}
+          />
         </div>
         <Box
           sx={{
-            padding: 4,
+            padding: 3,
             minWidth: "600px",
             maxWidth: "600px",
             margin: "auto",
