@@ -49,7 +49,6 @@ function App() {
                 bannerVisible={bannerVisible}
                 closeBanner={closeBanner}
               />
-              {window.location.pathname === "/" && <Sale />}
             </div>
           )}
 

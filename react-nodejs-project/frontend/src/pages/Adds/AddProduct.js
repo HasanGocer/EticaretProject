@@ -43,9 +43,16 @@ function AddProduct() {
   const [image_data, setImageFile] = useState(null); // Resim dosyası
   const [categorys, setCategorys] = useState([]);
   const [subcategorys, setSubcategorys] = useState([]);
+  const [allSubcategories, setAllSubcategories] = useState([]);
   const [trademarks, setTrademarks] = useState([]);
   const [variants, setVariants] = useState([]);
   const [additionalFeatures, setAdditionalFeatures] = useState([]);
+  const [additionalFeatureDetails, setAdditionalFeatureDetails] = useState({});
+  const [selectedvariantDetails, setSelectedVariantDetails] = useState({});
+  const [
+    selectedAdditionalFeatureDetails,
+    setSelectedAdditionalFeatureDetails,
+  ] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [selectedTrademark, setSelectedTrademark] = useState("");
@@ -85,30 +92,25 @@ function AddProduct() {
         "http://localhost:5000/get-categorys"
       );
       setCategorys(categoryRes.data);
+
       const subcategoryRes = await axios.get(
         "http://localhost:5000/get-subcategorys"
       );
-      setSubcategorys(subcategoryRes.data);
+      setAllSubcategories(subcategoryRes.data); // Tüm alt kategorileri kaydet
+      setSubcategorys([]); // Başlangıçta alt kategori listesi boş olmalı
+
       const trademarkRes = await axios.get(
         "http://localhost:5000/get-trademarks"
       );
       setTrademarks(trademarkRes.data);
+
       const additionalFeatureRes = await axios.get(
         "http://localhost:5000/get-additionalfeatures"
       );
       setAdditionalFeatures(additionalFeatureRes.data);
+
       const variantRes = await axios.get("http://localhost:5000/get-variants");
       setVariants(variantRes.data);
-    } catch (error) {
-      console.error("Dropdown verilerini alırken hata oluştu.", error);
-    }
-  };
-  const fetchDropdownSubCategoryData = async () => {
-    try {
-      const subcategoryRes = await axios.get(
-        "http://localhost:5000/get-subcategorys"
-      );
-      setSubcategorys(subcategoryRes.data);
     } catch (error) {
       console.error("Dropdown verilerini alırken hata oluştu.", error);
     }
@@ -156,13 +158,15 @@ function AddProduct() {
     e.preventDefault();
 
     let formErrors = {};
-    if (!name) formErrors.name = "Ürün adı gereklidir.";
-    if (!price) formErrors.price = "Fiyat gereklidir.";
-    if (!stockCode) formErrors.stockCode = "Stok kodu gereklidir.";
-    if (!stockQuantity) formErrors.stockQuantity = "Stok miktarı gereklidir.";
+    if (!name.trim()) formErrors.name = "Ürün adı gereklidir.";
+    if (!price || isNaN(price) || price <= 0)
+      formErrors.price = "Geçerli bir fiyat girin.";
+    if (!stockCode.trim()) formErrors.stockCode = "Stok kodu gereklidir.";
+    if (!stockQuantity || isNaN(stockQuantity) || stockQuantity < 0)
+      formErrors.stockQuantity = "Geçerli bir stok miktarı girin.";
     if (discountRate < 0 || discountRate > 100)
       formErrors.discountRate = "İndirim oranı 0 ile 100 arasında olmalıdır.";
-    if (!description) formErrors.description = "Açıklama gereklidir.";
+    if (!description.trim()) formErrors.description = "Açıklama gereklidir.";
     if (!selectedCategory)
       formErrors.selectedCategory = "Kategori seçilmelidir.";
     if (!selectedSubcategory)
@@ -170,9 +174,6 @@ function AddProduct() {
     if (!selectedTrademark)
       formErrors.selectedTrademark = "Marka seçilmelidir.";
     if (!image_data) formErrors.image_data = "Resim eklenmelidir.";
-    if (image_data && !image_data.type.startsWith("image/")) {
-      formErrors.image_data = "Yalnızca resim dosyaları kabul edilir.";
-    }
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
@@ -196,49 +197,37 @@ function AddProduct() {
         "additionalfeatures_id",
         JSON.stringify(selectedAdditionalFeatures)
       );
-
-      // Debug Log
-      console.log("Sending Data:", {
-        name,
-        price,
-        stockCode,
-        stockQuantity,
-        discountRate,
-        description,
-        selectedCategory,
-        selectedTrademark,
-        selectedSubcategory,
-        selectedVariants,
-        selectedAdditionalFeatures,
-      });
+      formData.append("variantDetails", JSON.stringify(selectedvariantDetails));
+      formData.append(
+        "additionalFeatureDetails",
+        JSON.stringify(selectedAdditionalFeatureDetails)
+      );
 
       const endpoint = "http://localhost:5000/add-product";
-
-      const response = await axios.post(endpoint, formData);
-      console.log("Response:", response);
+      const response = await axios.post(endpoint, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status === 200) {
         clearForm();
         fetchProducts();
       } else {
-        throw new Error("Beklenmeyen bir hata oluştu");
+        throw new Error("Beklenmeyen bir hata oluştu.");
       }
     } catch (error) {
       console.error("Ürün ekleme/güncelleme hatası:", error.response || error);
-      setMessage("Ürün eklenirken bir hata oluştu.");
+      setErrors({ general: "Ürün eklenirken bir hata oluştu." });
     }
   };
 
   const handleVariantsCheckboxChange = (e) => {
-    const variantId = e.target.value; // Artık sadece ID'yi alıyor
+    const variantId = Number(e.target.value);
     if (e.target.checked) {
-      // Checkbox işaretlendiyse id'yi ekle
-      setSelectedVariants((prevSelectedVariants) => [
-        ...prevSelectedVariants,
-        variantId,
-      ]);
+      setSelectedVariants((prevSelectedVariants) => {
+        console.log("Eklenen variantId: ", variantId);
+        return [...prevSelectedVariants, variantId];
+      });
     } else {
-      // Checkbox işaretinden kaldırıldıysa id'yi çıkar
       setSelectedVariants((prevSelectedVariants) =>
         prevSelectedVariants.filter((id) => id !== variantId)
       );
@@ -246,15 +235,13 @@ function AddProduct() {
   };
 
   const handleAdditionalFeaturesCheckboxChange = (e) => {
-    const additionalFeaturesId = e.target.value; // Artık sadece ID'yi alıyor
+    const additionalFeaturesId = Number(e.target.value); // Tip dönüşümü
     if (e.target.checked) {
-      // Checkbox işaretlendiyse id'yi ekle
-      setSelectedAdditionalFeatures((prevSelectedAdditionalFeatures) => [
-        ...prevSelectedAdditionalFeatures,
-        additionalFeaturesId,
-      ]);
+      setSelectedAdditionalFeatures((prevSelectedAdditionalFeatures) => {
+        console.log("Eklenen ekstra özellik ID: ", additionalFeaturesId);
+        return [...prevSelectedAdditionalFeatures, additionalFeaturesId];
+      });
     } else {
-      // Checkbox işaretinden kaldırıldıysa id'yi çıkar
       setSelectedAdditionalFeatures((prevSelectedAdditionalFeatures) =>
         prevSelectedAdditionalFeatures.filter(
           (id) => id !== additionalFeaturesId
@@ -262,9 +249,49 @@ function AddProduct() {
       );
     }
   };
+
+  const handleVariantDetailsChange = (variantID, index, field, value) => {
+    setSelectedVariantDetails((prev) => ({
+      ...prev,
+      [variantID]:
+        prev[variantID]?.map((detail, i) =>
+          i === index ? { ...detail, [field]: value } : detail
+        ) || [],
+    }));
+  };
+
+  const handleAdditionalFeatureDetailsChange = (featureID, field, value) => {
+    setSelectedAdditionalFeatureDetails((prev) => ({
+      ...prev,
+      [featureID]: {
+        ...prev[featureID],
+        [field]: value,
+      },
+    }));
+  };
+  const addVariantDetail = (variantID) => {
+    setSelectedVariantDetails((prev) => ({
+      ...prev,
+      [variantID]: prev[variantID]
+        ? [...prev[variantID], { name: "", image_data: null }]
+        : [{ name: "", image_data: null }],
+    }));
+  };
+
   const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-    setSelectedSubcategory(""); // Seçilen kategori değiştiğinde alt kategori sıfırlanır
+    const selectedCategoryID = e.target.value;
+    setSelectedCategory(selectedCategoryID);
+    setSelectedSubcategory(""); // Alt kategoriyi sıfırla
+
+    // Seçilen kategoriye göre alt kategorileri filtrele
+    if (selectedCategoryID) {
+      const filteredSubcategories = allSubcategories.filter(
+        (subcategory) => subcategory.categoryID === selectedCategoryID
+      );
+      setSubcategorys(filteredSubcategories);
+    } else {
+      setSubcategorys([]); // Kategori seçilmezse alt kategoriyi temizle
+    }
   };
 
   const handleSubcategoryChange = (e) => {
@@ -291,7 +318,6 @@ function AddProduct() {
 
   useEffect(() => {
     fetchDropdownData();
-    fetchDropdownSubCategoryData();
     fetchProducts();
   }, []);
 
@@ -418,6 +444,7 @@ function AddProduct() {
               </Select>
             </FormControl>
           </Grid>
+
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth disabled={!selectedCategory}>
               <InputLabel>Alt Kategori</InputLabel>
@@ -434,6 +461,7 @@ function AddProduct() {
               </Select>
             </FormControl>
           </Grid>
+
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Marka</InputLabel>
@@ -504,36 +532,124 @@ function AddProduct() {
             <Typography variant="h6">Varyantlar:</Typography>
             <List>
               {variants.map((variant) => (
-                <FormControlLabel
-                  key={variant.ID}
-                  control={
-                    <Checkbox
-                      value={variant.ID}
-                      onChange={handleVariantsCheckboxChange}
-                    />
-                  }
-                  label={variant.UrunAdi}
-                />
+                <div key={variant.ID}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        value={variant.ID}
+                        onChange={(e) =>
+                          handleVariantsCheckboxChange(e, variant.ID)
+                        }
+                      />
+                    }
+                    label={variant.UrunAdi}
+                  />
+                  {selectedVariants.includes(Number(variant.ID)) && (
+                    <div style={{ marginLeft: "20px", marginTop: "10px" }}>
+                      <Typography variant="subtitle1">
+                        {variant.UrunAdi} İçin Detaylar:
+                      </Typography>
+                      {Array.isArray(selectedvariantDetails[variant.ID]) &&
+                        selectedvariantDetails[variant.ID].map(
+                          (detail, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                marginTop: "10px",
+                                display: "flex",
+                                gap: "10px",
+                              }}
+                            >
+                              <TextField
+                                label="Varyant Adı"
+                                variant="outlined"
+                                size="small"
+                                value={detail.name}
+                                onChange={(e) =>
+                                  handleVariantDetailsChange(
+                                    variant.ID,
+                                    index,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleVariantDetailsChange(
+                                    variant.ID,
+                                    index,
+                                    "image_data",
+                                    e.target.files[0]
+                                  )
+                                }
+                                style={{ marginTop: "10px" }}
+                              />
+                            </div>
+                          )
+                        )}
+
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => addVariantDetail(variant.ID)}
+                        style={{ marginTop: "10px" }}
+                      >
+                        Alt Varyant Ekleyin
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ))}
             </List>
           </Grid>
+
           <Grid item xs={12}>
             <Typography variant="h6">Ekstra Özellikler:</Typography>
             <List>
               {additionalFeatures.map((feature) => (
-                <FormControlLabel
-                  key={feature.ID}
-                  control={
-                    <Checkbox
-                      value={feature.ID}
-                      onChange={handleAdditionalFeaturesCheckboxChange}
-                    />
-                  }
-                  label={feature.UrunAdi}
-                />
+                <div key={feature.ID}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        value={feature.ID}
+                        onChange={(e) =>
+                          handleAdditionalFeaturesCheckboxChange(e, feature.ID)
+                        }
+                      />
+                    }
+                    label={feature.UrunAdi}
+                  />
+                  {/* Özellik seçiliyse detay giriş alanını göster */}
+                  {selectedAdditionalFeatures.includes(Number(feature.ID)) && (
+                    <div style={{ marginLeft: "20px", marginTop: "10px" }}>
+                      <Typography variant="subtitle1">
+                        {feature.UrunAdi} İçin Detay:
+                      </Typography>
+                      <TextField
+                        label="Detay"
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        margin="normal"
+                        required
+                        onChange={(e) =>
+                          handleAdditionalFeatureDetailsChange(
+                            feature.ID,
+                            "details",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
               ))}
             </List>
           </Grid>
+
           <Grid item xs={12}>
             <TextareaAutosize
               minRows={4}
