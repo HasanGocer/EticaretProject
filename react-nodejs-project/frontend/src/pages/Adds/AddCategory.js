@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
   Button,
   Typography,
   TextField,
-  Grid,
   Accordion,
+  Alert,
   AccordionSummary,
   AccordionDetails,
   List,
   ListItem,
   IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import "./AddCategory.css"; // Dış CSS burada.
 
 function AddCategory() {
   const [category, setCategory] = useState("");
@@ -119,10 +118,25 @@ function AddCategory() {
   };
 
   return (
-    <Box className="container">
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <Typography variant="h4" className="heading">
-        Kategori ve Alt Kategori Yönetimi
+        Kategori ve Alt Kategori Ekleme
       </Typography>
+
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
 
       {/* Yeni Kategori Formu */}
       <Box className="form-wrapper">
@@ -173,52 +187,59 @@ function AddCategory() {
         </form>
       </Box>
 
-      {message && (
-        <Typography
-          variant="body1"
-          color="error"
-          align="center"
-          className="message"
-        >
-          {message}
-        </Typography>
-      )}
-
       {/* Kategorileri Listele */}
       <Box>
-        {categories.map((category) => (
-          <Accordion
-            key={category.ID}
-            expanded={expandedCategories[category.ID] || false}
-            onChange={() => toggleExpandCategory(category.ID)}
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="categories-panel-content"
           >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls={`panel${category.ID}-content`}
-            >
-              <Typography>{category.UrunAdi}</Typography>
-              <IconButton onClick={() => handleDeleteCategory(category.ID)}>
-                <Typography color="error">Sil</Typography>
-              </IconButton>
-            </AccordionSummary>
-            <AccordionDetails>
-              <List>
-                {subcategories
-                  .filter((sub) => sub.category_id === category.ID)
-                  .map((subcategory) => (
-                    <ListItem key={subcategory.id}>
-                      <Typography>{subcategory.name}</Typography>
-                      <IconButton
-                        onClick={() => handleDeleteSubcategory(subcategory.id)}
-                      >
-                        <Typography color="error">Sil</Typography>
-                      </IconButton>
-                    </ListItem>
-                  ))}
-              </List>
-            </AccordionDetails>
-          </Accordion>
-        ))}
+            <Typography>Kategoriler</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {categories.map((category) => (
+              <Accordion
+                key={category.ID}
+                expanded={expandedCategories[category.ID] || false}
+                onChange={() => toggleExpandCategory(category.ID)}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`panel${category.ID}-content`}
+                >
+                  <Typography>{category.UrunAdi}</Typography>
+                  <IconButton
+                    onClick={() => handleDeleteCategory(category.ID)}
+                    color="error"
+                    sx={{ padding: "8px" }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <List>
+                    {subcategories
+                      .filter((sub) => sub.category_id === category.ID)
+                      .map((subcategory) => (
+                        <ListItem key={subcategory.id}>
+                          <Typography>{subcategory.name}</Typography>
+                          <IconButton
+                            onClick={() =>
+                              handleDeleteSubcategory(subcategory.ID)
+                            }
+                            color="error"
+                            sx={{ padding: "8px" }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItem>
+                      ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </AccordionDetails>
+        </Accordion>
       </Box>
     </Box>
   );

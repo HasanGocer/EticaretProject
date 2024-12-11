@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Typography,
+  Alert,
+  TextField,
+  Modal,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+} from "@mui/material";
 import axios from "axios";
-import "./EditVariant.css";
 
 function EditVariant() {
   const [message, setMessage] = useState("");
@@ -44,55 +54,88 @@ function EditVariant() {
   }, []);
 
   return (
-    <div className="container">
-      <h2 className="heading">Varyant Düzenle</h2>
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <Typography variant="h4" align="center" gutterBottom>
+        Varyant Düzenle
+      </Typography>
 
-      {message && <p className="message">{message}</p>}
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
 
-      <h3>Varyant Listesi</h3>
-      <ul className="variant-list">
+      <Typography variant="h5" gutterBottom>
+        Varyant Listesi
+      </Typography>
+      <List className="variant-list">
         {variants.map((variant) => (
-          <li key={variant.ID} className="variant-item">
-            <span>{variant.UrunAdi}</span>
-            <button
-              className="edit-button"
-              onClick={() => setEditingVariant({ ...variant })}
-            >
-              Düzenle
-            </button>
-          </li>
+          <Paper key={variant.ID} className="variant-item">
+            <ListItem>
+              <ListItemText primary={variant.UrunAdi} />
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="edit-button"
+                  onClick={() => setEditingVariant({ ...variant })}
+                >
+                  Düzenle
+                </Button>
+              </Box>
+            </ListItem>
+          </Paper>
         ))}
-      </ul>
+      </List>
 
       {/* Düzenleme Modalı */}
-      {editingVariant && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Varyantı Düzenle</h3>
-            <input
-              type="text"
-              value={editingVariant.UrunAdi}
-              onChange={(e) =>
-                setEditingVariant({
-                  ...editingVariant,
-                  UrunAdi: e.target.value,
-                })
-              }
-              className="input-field"
-            />
-            <div className="modal-actions">
-              <button className="button" onClick={updateVariant}>
-                Kaydet
-              </button>
-              <button className="button cancel-button" onClick={closeEditModal}>
-                İptal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Modal open={!!editingVariant} onClose={closeEditModal} className="modal">
+        <Box className="modal-content">
+          <Typography variant="h6" className="modal-title">
+            Varyantı Düzenle
+          </Typography>
+          <TextField
+            fullWidth
+            label="Ürün Adı"
+            value={editingVariant?.UrunAdi || ""}
+            onChange={(e) =>
+              setEditingVariant({
+                ...editingVariant,
+                UrunAdi: e.target.value,
+              })
+            }
+            className="input-field"
+          />
+          <Box className="modal-actions">
+            <Button
+              variant="contained"
+              color="success"
+              className="button"
+              onClick={updateVariant}
+            >
+              Kaydet
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              className="button cancel-button"
+              onClick={closeEditModal}
+            >
+              İptal
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </Box>
   );
 }
-
 export default EditVariant;

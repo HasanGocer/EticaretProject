@@ -334,7 +334,6 @@ app.post("/add-product", upload.single("image_data"), (req, res) => {
 
       const productId = result.insertId;
 
-      // Varyantları ekle
       if (variants_id) {
         const variantIds = JSON.parse(variants_id);
         if (variantIds.length > 0) {
@@ -347,24 +346,6 @@ app.post("/add-product", upload.single("image_data"), (req, res) => {
           });
         }
       }
-
-      // Variant detaylarını ekle
-      if (variantDetails) {
-        const detailsList = JSON.parse(variantDetails);
-        detailsList.forEach((detail) => {
-          const queryVariantDetails =
-            "INSERT INTO product_variant_details (product_id, variant_id, image_data, name) VALUES (?, ?, ?, ?)";
-          db.query(
-            queryVariantDetails,
-            [productId, detail.variant_id, detail.image_data, detail.name],
-            (err) => {
-              if (err) console.error("Varyant detayları eklenemedi:", err);
-            }
-          );
-        });
-      }
-
-      // Ekstra özellikleri ekle
       if (additionalfeatures_id) {
         const additionalIds = JSON.parse(additionalfeatures_id);
         additionalIds.forEach((featureId) => {
@@ -375,20 +356,51 @@ app.post("/add-product", upload.single("image_data"), (req, res) => {
           });
         });
       }
+      if (variantDetails) {
+        const detailsList = Object.entries(JSON.parse(variantDetails)); // Get entries to loop over
+        detailsList.forEach(([variantId, detailsArray]) => {
+          detailsArray.forEach((detail) => {
+            const imageData =
+              detail.image_data && Object.keys(detail.image_data).length > 0
+                ? detail.image_data
+                : null; // Check if image_data exists
 
-      // Ekstra özellik detaylarını ekle
+            if (!variantId) {
+              console.error("Geçerli bir variant_id bulunamadı!");
+              return; // Skip if variant_id is missing
+            }
+
+            // Insert variant details with proper association
+            const queryVariantDetails =
+              "INSERT INTO product_variant_details (product_id, variant_id, image_data, name) VALUES (?, ?, ?, ?)";
+            db.query(
+              queryVariantDetails,
+              [productId, variantId, imageData, detail.name],
+              (err) => {
+                if (err) console.error("Varyant detayları eklenemedi:", err);
+              }
+            );
+          });
+        });
+      }
       if (additionalFeatureDetails) {
-        const featureDetailsList = JSON.parse(additionalFeatureDetails);
-        featureDetailsList.forEach((featureDetail) => {
+        const featureDetailsList = Object.entries(
+          JSON.parse(additionalFeatureDetails)
+        ); // Get entries to loop over
+        featureDetailsList.forEach(([featureId, featureDetail]) => {
+          const { details } = featureDetail;
+
+          if (!featureId || !details) {
+            console.error("Geçerli ekstra özellik detayları bulunamadı!");
+            return; // Skip if feature_id or details are missing
+          }
+
+          // Insert additional feature details with proper association
           const queryFeatureDetails =
             "INSERT INTO product_additionalfeatures_details (product_id, additionalfeature_id, details) VALUES (?, ?, ?)";
           db.query(
             queryFeatureDetails,
-            [
-              productId,
-              featureDetail.additionalfeature_id,
-              featureDetail.details,
-            ],
+            [productId, featureId, details],
             (err) => {
               if (err)
                 console.error("Ekstra özellik detayları eklenemedi:", err);
@@ -516,27 +528,27 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
     subcategory_id,
     variants_id,
     additionalfeatures_id,
-    variant_details, // Yeni varyant detayları
-    additionalfeature_details, // Yeni ekstra özellik detayları
+    variant_details, // New variant details
+    additionalfeature_details, // New extra feature details
   } = req.body;
 
   const productId = req.params.id;
 
-  // Resim URL'sini oluştur
+  // Handle image URL
   let imageUrl = null;
   if (req.file) {
     imageUrl =
       req.protocol + "://" + req.get("host") + "/uploads/" + req.file.filename;
   }
 
-  // Gerekli alanların kontrolü
+  // Validate required fields
   if (!name || !price || !stockCode || !stockQuantity) {
     return res.status(400).json({
       message: "Ürün adı, fiyat, stok kodu ve stok miktarı gereklidir.",
     });
   }
 
-  // Ürünü güncelleme sorgusu
+  // Update product query
   const updateProductQuery = `
     UPDATE products
     SET name = ?, price = ?, stockCode = ?, stockQuantity = ?, discountRate = ?, description = ?, category_id = ?, trademark_id = ?, subcategory_id = ?
@@ -559,58 +571,88 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
   if (imageUrl) queryParams.push(imageUrl);
   queryParams.push(productId);
 
+  // Execute product update
   db.query(updateProductQuery, queryParams, (err) => {
     if (err) {
       console.error("Ürün güncelleme hatası:", err);
       return res.status(500).json({ message: "Ürün güncellenemedi." });
     }
 
-    // Varyantları güncelle
+    // Handle variants and variant details
     if (variants_id) {
       const variantIds = JSON.parse(variants_id);
 
-      db.query(
-        "DELETE FROM product_variants WHERE product_id = ?",
-        [productId],
-        (err) => {
-          if (err) console.error("Varyant silme hatası:", err);
-
-          const insertVariantPromises = variantIds.map((variantId) => {
-            return new Promise((resolve, reject) => {
-              db.query(
-                "INSERT INTO product_variants (product_id, variant_id) VALUES (?, ?)",
-                [productId, variantId],
-                (err) => {
-                  if (err) {
-                    console.error("Varyant ekleme hatası:", err);
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
-                }
-              );
-            });
-          });
-
-          Promise.all(insertVariantPromises)
-            .then(() => console.log("Varyantlar başarıyla güncellendi."))
-            .catch(() =>
-              res.status(500).json({ message: "Varyantlar güncellenemedi." })
-            );
-        }
-      );
-    }
-
-    // Variant detaylarını güncelle
-    if (variant_details) {
-      const variantDetails = JSON.parse(variant_details);
-
+      // Delete old variants and related details
       db.query(
         "DELETE FROM product_variant_details WHERE product_id = ?",
         [productId],
         (err) => {
-          if (err) console.error("Varyant detayları silme hatası:", err);
+          if (err) {
+            console.error("Varyant detayları silme hatası:", err);
+            return res
+              .status(500)
+              .json({ message: "Varyant detayları güncellenemedi." });
+          }
 
+          db.query(
+            "DELETE FROM product_variants WHERE product_id = ?",
+            [productId],
+            (err) => {
+              if (err) {
+                console.error("Varyant silme hatası:", err);
+                return res
+                  .status(500)
+                  .json({ message: "Varyantlar güncellenemedi." });
+              }
+
+              // Insert new variants
+              const insertVariantPromises = variantIds.map((variantId) => {
+                return new Promise((resolve, reject) => {
+                  db.query(
+                    "INSERT INTO product_variants (product_id, variant_id) VALUES (?, ?)",
+                    [productId, variantId],
+                    (err) => {
+                      if (err) {
+                        console.error("Varyant ekleme hatası:", err);
+                        reject(err);
+                      } else {
+                        resolve();
+                      }
+                    }
+                  );
+                });
+              });
+
+              Promise.all(insertVariantPromises)
+                .then(() => console.log("Varyantlar başarıyla güncellendi."))
+                .catch(() =>
+                  res
+                    .status(500)
+                    .json({ message: "Varyantlar güncellenemedi." })
+                );
+            }
+          );
+        }
+      );
+    }
+
+    // Handle variant details update
+    if (variant_details) {
+      const variantDetails = JSON.parse(variant_details);
+
+      // Delete old variant details and insert new details
+      db.query(
+        "DELETE FROM product_variant_details WHERE product_id = ?",
+        [productId],
+        (err) => {
+          if (err) {
+            console.error("Varyant detayları silme hatası:", err);
+            return res
+              .status(500)
+              .json({ message: "Varyant detayları güncellenemedi." });
+          }
+
+          // Insert new variant details
           const insertDetailsPromises = variantDetails.map((detail) => {
             return new Promise((resolve, reject) => {
               db.query(
@@ -639,7 +681,7 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
       );
     }
 
-    // Ekstra özellikleri güncelle
+    // Handle additional feature updates
     if (additionalfeatures_id) {
       const additionalFeatureIds = JSON.parse(additionalfeatures_id);
 
@@ -647,7 +689,12 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
         "DELETE FROM product_additionalfeatures WHERE product_id = ?",
         [productId],
         (err) => {
-          if (err) console.error("Ekstra özellik silme hatası:", err);
+          if (err) {
+            console.error("Ekstra özellik silme hatası:", err);
+            return res
+              .status(500)
+              .json({ message: "Ekstra özellikler güncellenemedi." });
+          }
 
           const insertFeaturePromises = additionalFeatureIds.map(
             (featureId) => {
@@ -679,7 +726,7 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
       );
     }
 
-    // Ekstra özellik detayları güncelle
+    // Handle additional feature details update
     if (additionalfeature_details) {
       const featureDetails = JSON.parse(additionalfeature_details);
 
@@ -687,7 +734,12 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
         "DELETE FROM product_additionalfeatures_details WHERE product_id = ?",
         [productId],
         (err) => {
-          if (err) console.error("Ekstra özellik detayları silme hatası:", err);
+          if (err) {
+            console.error("Ekstra özellik detayları silme hatası:", err);
+            return res
+              .status(500)
+              .json({ message: "Ekstra özellik detayları güncellenemedi." });
+          }
 
           const insertDetailsPromises = featureDetails.map((detail) => {
             return new Promise((resolve, reject) => {
@@ -723,6 +775,7 @@ app.put("/update-product/:id", upload.single("image_data"), (req, res) => {
     }
   });
 });
+
 app.delete("/delete-product/:id", (req, res) => {
   const { id } = req.params;
 
@@ -826,6 +879,31 @@ app.get("/get-variants", (req, res) => {
     res.status(200).json(results);
   });
 });
+app.put("/update-variant/:id", async (req, res) => {
+  const { id } = req.params;
+  const { UrunAdi } = req.body;
+
+  if (!id || !UrunAdi) {
+    return res.status(400).json({ message: "ID ve UrunAdi gerekli." });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE variants SET UrunAdi = ? WHERE ID = ?",
+      [UrunAdi, id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Varyant başarıyla güncellendi!" });
+    } else {
+      res.status(404).json({ message: "Varyant bulunamadı!" });
+    }
+  } catch (error) {
+    console.error("Varyant güncellenirken hata:", error.message);
+    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
+  }
+});
+
 app.delete("/delete-variant/:id", (req, res) => {
   const { id } = req.params;
 
@@ -1016,14 +1094,22 @@ app.delete("/delete-subcategory/:id", (req, res) => {
 });
 //#endregion
 //#region trademark
-app.post("/add-trademark", (req, res) => {
+app.post("/add-trademark", upload.single("image"), (req, res) => {
   const { trademark } = req.body;
-  const sql = "INSERT INTO trademarks (UrunAdi) VALUES (?)";
-  db.query(sql, [trademark], (err, result) => {
+  const imageFile = req.file;
+
+  if (!imageFile) {
+    return res.status(400).json({ message: "Resim dosyası gereklidir." });
+  }
+
+  const imageUrl = `/uploads/${imageFile.filename}`; // Yüklenen resmin yolu
+
+  const sql = "INSERT INTO trademarks (UrunAdi, image_data) VALUES (?, ?)";
+  db.query(sql, [trademark, imageUrl], (err, result) => {
     if (err) {
-      res.status(500).send(err);
+      return res.status(500).send(err);
     } else {
-      res.status(200).send("Fiyat başarıyla kaydedildi!");
+      res.status(200).send({ message: "Trademark başarıyla kaydedildi!" });
     }
   });
 });
@@ -1037,40 +1123,61 @@ app.get("/get-trademarks", (req, res) => {
     res.status(200).json(results);
   });
 });
-app.put("/update-trademark/:id", async (req, res) => {
-  const { id } = req.params; // URL'den gelen ID
-  const { UrunAdi } = req.body; // İstek gövdesinden gelen yeni ad
+app.put("/update-trademark/:id", (req, res) => {
+  const { id } = req.params;
+  const { UrunAdi } = req.body;
 
   if (!id || !UrunAdi) {
     return res.status(400).json({ message: "ID ve UrunAdi gerekli." });
   }
 
-  try {
-    const result = await db.query(
-      "UPDATE trademarks SET UrunAdi = ? WHERE ID = ?",
-      [UrunAdi, id]
-    );
+  const query = "UPDATE trademarks SET UrunAdi = ? WHERE ID = ?";
+  db.query(query, [UrunAdi, id], (err, result) => {
+    if (err) {
+      console.error("Trademark güncellenirken hata:", err);
+      return res
+        .status(500)
+        .json({ message: "Bir hata oluştu.", error: err.message });
+    }
 
     if (result.affectedRows > 0) {
-      res.json({ message: "Trademark başarıyla güncellendi." });
+      return res.json({ message: "Trademark başarıyla güncellendi." });
     } else {
-      res.status(404).json({ message: "Trademark bulunamadı." });
+      return res.status(404).json({ message: "Trademark bulunamadı." });
     }
-  } catch (error) {
-    console.error("Trademark güncellenirken hata:", error.message);
-    res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
-  }
+  });
 });
 app.delete("/delete-trademark/:id", (req, res) => {
   const { id } = req.params;
 
-  const query = "DELETE FROM trademarks WHERE id = ?";
+  const query = "SELECT image_data FROM trademarks WHERE ID = ?";
   db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Ürün silme hatası:", err);
-      return res.status(500).json({ message: "Ürün silinemedi." });
+    if (err || result.length === 0) {
+      console.error("Trademark bulunamadı:", err);
+      return res.status(404).json({ message: "Trademark bulunamadı." });
     }
-    res.status(200).json({ message: "Ürün başarıyla silindi." });
+
+    const imagePath = result[0].image_data;
+    // Dosyayı silme (eğer dosya varsa)
+    const fs = require("fs");
+    const fullPath = path.join(__dirname, imagePath);
+
+    fs.unlink(fullPath, (err) => {
+      if (err) {
+        console.error("Resim silinirken hata:", err);
+        return res.status(500).json({ message: "Resim silinemedi." });
+      }
+
+      // Veritabanından silme işlemi
+      const deleteQuery = "DELETE FROM trademarks WHERE ID = ?";
+      db.query(deleteQuery, [id], (err, result) => {
+        if (err) {
+          console.error("Ürün silme hatası:", err);
+          return res.status(500).json({ message: "Ürün silinemedi." });
+        }
+        res.status(200).json({ message: "Ürün başarıyla silindi." });
+      });
+    });
   });
 });
 //#endregion

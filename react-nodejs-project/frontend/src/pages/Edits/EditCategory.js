@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Alert,
+  List,
+  ListItem,
+  ListItemText,
+  Modal,
+} from "@mui/material";
 import axios from "axios";
-import "./EditCategory.css";
 
 function EditCategory() {
   const [message, setMessage] = useState("");
@@ -90,17 +99,34 @@ function EditCategory() {
   }, []);
 
   return (
-    <div className="container">
-      <h2 className="heading">Kategori Düzenle</h2>
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <Typography variant="h4" className="heading">
+        Kategori Düzenle
+      </Typography>
 
-      {message && <p className="message">{message}</p>}
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
 
-      <h3>Kategori Listesi</h3>
-      <ul className="category-list">
+      <Typography variant="h5">Kategori Listesi</Typography>
+      <List className="category-list">
         {categories.map((category) => (
-          <li key={category.ID} className="category-item">
-            <span>{category.UrunAdi}</span>
-            <button
+          <ListItem key={category.ID} className="category-item">
+            <ListItemText primary={category.UrunAdi} />
+            <Button
+              variant="contained"
+              color="primary"
               className="edit-button"
               onClick={() => {
                 setEditingCategory({ ...category });
@@ -108,18 +134,20 @@ function EditCategory() {
               }}
             >
               Düzenle
-            </button>
-          </li>
+            </Button>
+          </ListItem>
         ))}
-      </ul>
+      </List>
 
       {/* Düzenleme Modalı */}
       {editingCategory && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Kategori'yi Düzenle</h3>
-            <input
-              type="text"
+        <Modal open={Boolean(editingCategory)} onClose={closeEditCategoryModal}>
+          <Box className="modal-content">
+            <Typography variant="h6">Kategori'yi Düzenle</Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              margin="normal"
               value={editingCategory.UrunAdi}
               onChange={(e) =>
                 setEditingCategory({
@@ -129,44 +157,56 @@ function EditCategory() {
               }
               className="input-field"
             />
-            <div className="modal-actions">
-              <button className="button" onClick={updateCategory}>
+            <Box className="modal-actions">
+              <Button
+                variant="contained"
+                color="success"
+                className="button"
+                onClick={updateCategory}
+              >
                 Kaydet
-              </button>
-              <button
-                className="button cancel-button"
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                className="cancel-button"
                 onClick={closeEditCategoryModal}
               >
                 İptal
-              </button>
-            </div>
-            <h4>Alt Kategoriler</h4>
-            <ul className="subcategory-list">
+              </Button>
+            </Box>
+            <Typography variant="subtitle1" gutterBottom>
+              Alt Kategoriler
+            </Typography>
+            <List className="subcategory-list">
               {subcategories
                 .filter((sub) => sub.category_id === editingCategory.ID)
                 .map((sub) => (
-                  <li key={sub.id} className="subcategory-item">
-                    <input
-                      type="text"
+                  <ListItem key={sub.id} className="subcategory-item">
+                    <TextField
+                      fullWidth
+                      variant="outlined"
                       value={editingSubcategories[sub.id]?.name || sub.name}
                       onChange={(e) =>
                         handleSubcategoryChange(sub.id, e.target.value)
                       }
                       className="input-field"
                     />
-                    <button
+                    <Button
+                      variant="contained"
+                      color="success"
                       className="button"
                       onClick={() => updateSubcategory(sub.id)}
                     >
                       Kaydet
-                    </button>
-                  </li>
+                    </Button>
+                  </ListItem>
                 ))}
-            </ul>
-          </div>
-        </div>
+            </List>
+          </Box>
+        </Modal>
       )}
-    </div>
+    </Box>
   );
 }
 

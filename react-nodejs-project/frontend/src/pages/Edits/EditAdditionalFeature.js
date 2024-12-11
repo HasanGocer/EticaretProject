@@ -1,20 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import './EditAdditionalFeature.css';
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Alert,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+} from "@mui/material";
+import axios from "axios";
 
 function EditAdditionalFeature() {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [additionalfeatures, setAdditionalFeatures] = useState([]);
   const [editingFeature, setEditingFeature] = useState(null); // Editing feature
 
   // Fetch additional features
   const fetchAdditionalFeatures = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get-additionalfeatures');
+      const response = await axios.get(
+        "http://localhost:5000/get-additionalfeatures"
+      );
       setAdditionalFeatures(response.data);
     } catch (error) {
-      console.error('Error fetching additional features.', error);
+      console.error("Error fetching additional features.", error);
     }
   };
 
@@ -27,7 +42,7 @@ function EditAdditionalFeature() {
       );
       setMessage(response.data.message);
     } catch (error) {
-      console.error('Error updating additional feature.', error);
+      console.error("Error updating additional feature.", error);
     }
     setEditingFeature(null);
     fetchAdditionalFeatures();
@@ -43,36 +58,58 @@ function EditAdditionalFeature() {
   }, []);
 
   return (
-    <div className="container">
-      <h2 className="heading">Additional Feature Ekle</h2>
-      <Link to="/admin">
-        <button className="button">Ana Sayfaya Dön</button>
-      </Link>
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <Typography variant="h4" align="center" gutterBottom>
+        Ek Özellikleri Düzenle
+      </Typography>
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
 
-      {message && <p className="message">{message}</p>}
-
-      <h3>Additional Feature Listesi</h3>
-      <ul className="additional-feature-list">
-        {additionalfeatures.map((feature) => (
-          <li key={feature.ID} className="additional-feature-item">
-            <span>{feature.UrunAdi}</span>
-            <button
-              className="edit-button"
-              onClick={() => setEditingFeature({ ...feature })}
+      <Typography variant="h5" gutterBottom>
+        Ek Özellikleri Listesi
+      </Typography>
+      <Paper elevation={3}>
+        <List>
+          {additionalfeatures.map((feature) => (
+            <ListItem
+              key={feature.ID}
+              secondaryAction={
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setEditingFeature({ ...feature })}
+                >
+                  Düzenle
+                </Button>
+              }
             >
-              Düzenle
-            </button>
-          </li>
-        ))}
-      </ul>
+              <ListItemText primary={feature.UrunAdi} />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
 
       {/* Edit Modal */}
       {editingFeature && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Additional Feature Düzenle</h3>
-            <input
-              type="text"
+        <Dialog open={!!editingFeature} onClose={closeEditModal}>
+          <DialogTitle>Additional Feature Düzenle</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Ürün Adı"
               value={editingFeature.UrunAdi}
               onChange={(e) =>
                 setEditingFeature({
@@ -80,20 +117,19 @@ function EditAdditionalFeature() {
                   UrunAdi: e.target.value,
                 })
               }
-              className="input-field"
             />
-            <div className="modal-actions">
-              <button className="button" onClick={updateFeature}>
-                Kaydet
-              </button>
-              <button className="button cancel-button" onClick={closeEditModal}>
-                İptal
-              </button>
-            </div>
-          </div>
-        </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={updateFeature} variant="contained" color="primary">
+              Kaydet
+            </Button>
+            <Button onClick={closeEditModal} variant="contained" color="error">
+              İptal
+            </Button>
+          </DialogActions>
+        </Dialog>
       )}
-    </div>
+    </Box>
   );
 }
 

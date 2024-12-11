@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
   Button,
   Typography,
-  TextField,
-  Grid,
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  TextField,
+  Grid,
+  Alert,
   List,
-  ListItem,
   IconButton,
   Select,
   MenuItem,
@@ -30,7 +29,6 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
-import "./AddProduct.css"; // Özel stil dosyası
 
 function AddProduct() {
   //#region fields
@@ -46,6 +44,7 @@ function AddProduct() {
   const [allSubcategories, setAllSubcategories] = useState([]);
   const [trademarks, setTrademarks] = useState([]);
   const [variants, setVariants] = useState([]);
+  const [variantsDetails, setVariantsDetails] = useState([]);
   const [additionalFeatures, setAdditionalFeatures] = useState([]);
   const [additionalFeatureDetails, setAdditionalFeatureDetails] = useState({});
   const [selectedvariantDetails, setSelectedVariantDetails] = useState({});
@@ -60,10 +59,6 @@ function AddProduct() {
   const [selectedAdditionalFeatures, setSelectedAdditionalFeatures] = useState(
     []
   );
-  const [productAdditionalFeatures, setProductAdditionalFeatures] = useState(
-    []
-  );
-  const [productVariants, setProductVariants] = useState([]);
   const [products, setProducts] = useState([]);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({}); // Hata mesajları
@@ -74,14 +69,14 @@ function AddProduct() {
     try {
       const response = await axios.get("http://localhost:5000/get-products");
       setProducts(response.data);
-      const response1 = await axios.get(
-        "http://localhost:5000/get-product-variants"
+      const response3 = await axios.get(
+        "http://localhost:5000/get-product-variant-details"
       );
-      setProductVariants(response1.data);
-      const response2 = await axios.get(
-        "http://localhost:5000/get-product-additionalfeatures"
+      setVariantsDetails(response3.data);
+      const response4 = await axios.get(
+        "http://localhost:5000/get-product-additionalfeatures-details"
       );
-      setProductAdditionalFeatures(response2.data);
+      setAdditionalFeatureDetails(response4.data);
     } catch (error) {
       console.error("Ürünleri alırken bir hata oluştu.", error);
     }
@@ -130,29 +125,13 @@ function AddProduct() {
     );
     return trademark ? trademark.UrunAdi : "Bilinmeyen Marka";
   };
-  const getVariantNames = (variantIds) => {
-    const variantNames = productVariants
-      .filter((variant) => variant.product_id === variantIds.id) // Filtreleme yapıyoruz
-      .map((variant) => <li key={variant.id}>{variant.variant_name}</li>); // JSX döndürüyoruz
-
-    return variantNames.length > 0 ? variantNames : <li>Bilinmeyen Varyant</li>; // Eğer variant bulunmazsa, bir varsayılan mesaj döner
-  };
   const getSubcategoryName = (subcategoryId) => {
-    const subcategory = subcategorys.find(
+    const subcategory = allSubcategories.find(
       (subcat) => subcat.id === subcategoryId
     );
     return subcategory ? subcategory.name : "Bilinmeyen Alt Kategori";
   };
-  const getAdditionalFeatureNames = (featureIds) => {
-    const featureNames = productAdditionalFeatures
-      .filter((feature) => feature.product_id === featureIds.id) // Filtreleme yapıyoruz
-      .map((feature) => <li key={feature.id}>{feature.additional_feature}</li>); // JSX döndürüyoruz
-
-    return featureNames.length > 0 ? featureNames : <li>Bilinmeyen Özellik</li>; // Eğer özellik bulunmazsa, bir varsayılan mesaj döner
-  };
-
   //#endregion
-
   //#region  handles
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -202,7 +181,9 @@ function AddProduct() {
         "additionalFeatureDetails",
         JSON.stringify(selectedAdditionalFeatureDetails)
       );
-
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
       const endpoint = "http://localhost:5000/add-product";
       const response = await axios.post(endpoint, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -222,18 +203,17 @@ function AddProduct() {
 
   const handleVariantsCheckboxChange = (e) => {
     const variantId = Number(e.target.value);
-    if (e.target.checked) {
+    if (variantId && e.target.checked) {
       setSelectedVariants((prevSelectedVariants) => {
         console.log("Eklenen variantId: ", variantId);
         return [...prevSelectedVariants, variantId];
       });
-    } else {
+    } else if (variantId && !e.target.checked) {
       setSelectedVariants((prevSelectedVariants) =>
         prevSelectedVariants.filter((id) => id !== variantId)
       );
     }
   };
-
   const handleAdditionalFeaturesCheckboxChange = (e) => {
     const additionalFeaturesId = Number(e.target.value); // Tip dönüşümü
     if (e.target.checked) {
@@ -247,9 +227,14 @@ function AddProduct() {
           (id) => id !== additionalFeaturesId
         )
       );
+
+      // Ek özellik seçeneği kaldırıldığında, ilgili detayları da sil
+      setSelectedAdditionalFeatureDetails((prev) => {
+        const { [additionalFeaturesId]: removed, ...rest } = prev; // Seçilen özelliğin detaylarını sil
+        return rest;
+      });
     }
   };
-
   const handleVariantDetailsChange = (variantID, index, field, value) => {
     setSelectedVariantDetails((prev) => ({
       ...prev,
@@ -259,7 +244,6 @@ function AddProduct() {
         ) || [],
     }));
   };
-
   const handleAdditionalFeatureDetailsChange = (featureID, field, value) => {
     setSelectedAdditionalFeatureDetails((prev) => ({
       ...prev,
@@ -268,6 +252,17 @@ function AddProduct() {
         [field]: value,
       },
     }));
+  };
+  const removeVariantDetail = (variantID, detailIndex) => {
+    setSelectedVariantDetails((prev) => {
+      const updatedDetails = { ...prev };
+      if (Array.isArray(updatedDetails[variantID])) {
+        updatedDetails[variantID] = updatedDetails[variantID].filter(
+          (_, index) => index !== detailIndex
+        );
+      }
+      return updatedDetails;
+    });
   };
   const addVariantDetail = (variantID) => {
     setSelectedVariantDetails((prev) => ({
@@ -300,9 +295,7 @@ function AddProduct() {
 
   const handleDelete = async (productId) => {
     try {
-      console.log("Silinen ürünün id'si:", productId);
       await axios.delete(`http://localhost:5000/delete-product/${productId}`);
-      console.log("Silme işlemi başarılı");
       setMessage("Ürün başarıyla silindi.");
       fetchProducts();
     } catch (error) {
@@ -370,11 +363,24 @@ function AddProduct() {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
+    <Box
+      sx={{
+        maxWidth: "95%",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <Typography variant="h4" gutterBottom>
         Ürün Ekle
-      </Typography>
-
+      </Typography>{" "}
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
       <form onSubmit={handleSubmit}>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
@@ -444,7 +450,6 @@ function AddProduct() {
               </Select>
             </FormControl>
           </Grid>
-
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth disabled={!selectedCategory}>
               <InputLabel>Alt Kategori</InputLabel>
@@ -461,7 +466,6 @@ function AddProduct() {
               </Select>
             </FormControl>
           </Grid>
-
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Marka</InputLabel>
@@ -527,7 +531,6 @@ function AddProduct() {
               </Box>
             </Grid>
           )}
-
           <Grid item xs={12}>
             <Typography variant="h6">Varyantlar:</Typography>
             <List>
@@ -558,6 +561,7 @@ function AddProduct() {
                                 marginTop: "10px",
                                 display: "flex",
                                 gap: "10px",
+                                alignItems: "center",
                               }}
                             >
                               <TextField
@@ -587,6 +591,15 @@ function AddProduct() {
                                 }
                                 style={{ marginTop: "10px" }}
                               />
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() =>
+                                  removeVariantDetail(variant.ID, index)
+                                }
+                              >
+                                Sil
+                              </Button>
                             </div>
                           )
                         )}
@@ -605,7 +618,6 @@ function AddProduct() {
               ))}
             </List>
           </Grid>
-
           <Grid item xs={12}>
             <Typography variant="h6">Ekstra Özellikler:</Typography>
             <List>
@@ -649,7 +661,6 @@ function AddProduct() {
               ))}
             </List>
           </Grid>
-
           <Grid item xs={12}>
             <TextareaAutosize
               minRows={4}
@@ -669,69 +680,137 @@ function AddProduct() {
       <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
         Mevcut Ürünler
       </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Ürün Adı</TableCell>
-              <TableCell>Fiyat</TableCell>
-              <TableCell>Stok Kodu</TableCell>
-              <TableCell>Stok Miktarı</TableCell>
-              <TableCell>İndirim Oranı</TableCell>
-              <TableCell>İndirimli Fiyat</TableCell>
-              <TableCell>Açıklama</TableCell>
-              <TableCell>Kategori</TableCell>
-              <TableCell>Alt Kategori</TableCell>
-              <TableCell>Marka</TableCell>
-              <TableCell>Varyantlar</TableCell>
-              <TableCell>Ekstra Özellikler</TableCell>
-              <TableCell>Resim</TableCell>
-              <TableCell>İşlemler</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.price}₺</TableCell>
-                <TableCell>{product.stockCode}</TableCell>
-                <TableCell>{product.stockQuantity}</TableCell>
-                <TableCell>{product.discountRate}%</TableCell>
-                <TableCell>
-                  {calculateDiscountedPrice(
-                    product.price,
-                    product.discountRate
-                  )}
-                  ₺
-                </TableCell>
-                <TableCell>{product.description}</TableCell>
-                <TableCell>{getCategoryName(product.category_id)}</TableCell>
-                <TableCell>
-                  {getSubcategoryName(product.subcategory_id)}
-                </TableCell>
-                <TableCell>{getTrademarkName(product.trademark_id)}</TableCell>
-                <TableCell>{getVariantNames(product)}</TableCell>
-                <TableCell>{getAdditionalFeatureNames(product)}</TableCell>
-                <TableCell>
-                  <img
-                    src={product.image_data}
-                    alt={product.name}
-                    style={{ width: 50 }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <IconButton
-                    onClick={() => handleDelete(product.id)}
-                    color="error"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <h3>Ürün Listesi</h3>
+        </AccordionSummary>
+        <AccordionDetails>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Ürün Adı</TableCell>
+                  <TableCell>Fiyat</TableCell>
+                  <TableCell>Stok Kodu</TableCell>
+                  <TableCell>Stok Miktarı</TableCell>
+                  <TableCell>İndirim Oranı</TableCell>
+                  <TableCell>İndirimli Fiyat</TableCell>
+                  <TableCell>Açıklama</TableCell>
+                  <TableCell>Kategori</TableCell>
+                  <TableCell>Alt Kategori</TableCell>
+                  <TableCell>Marka</TableCell>
+                  <TableCell>Varyantlar</TableCell>
+                  <TableCell>Ekstra Özellikler</TableCell>
+                  <TableCell>Resim</TableCell>
+                  <TableCell>İşlemler</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.price}₺</TableCell>
+                    <TableCell>{product.stockCode}</TableCell>
+                    <TableCell>{product.stockQuantity}</TableCell>
+                    <TableCell>{product.discountRate}%</TableCell>
+                    <TableCell>
+                      {calculateDiscountedPrice(
+                        product.price,
+                        product.discountRate
+                      )}
+                      ₺
+                    </TableCell>
+                    <TableCell>{product.description}</TableCell>
+                    <TableCell>
+                      {getCategoryName(product.category_id)}
+                    </TableCell>
+                    <TableCell>
+                      {getSubcategoryName(product.subcategory_id)}
+                    </TableCell>
+                    <TableCell>
+                      {getTrademarkName(product.trademark_id)}
+                    </TableCell>
+                    <TableCell>
+                      <Accordion>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography>Varyantlar</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <div>
+                            {/* Variants grouped by variant_name */}
+                            {Object.entries(
+                              variantsDetails.reduce((acc, variant) => {
+                                if (variant.product_id === product.id) {
+                                  acc[variant.variant_name] =
+                                    acc[variant.variant_name] || [];
+                                  acc[variant.variant_name].push(variant);
+                                }
+                                return acc;
+                              }, {})
+                            ).map(([variantName, variants]) => (
+                              <div key={variantName}>
+                                <h3>Varyant Adı: {variantName}</h3>
+                                {variants.map((variant) => (
+                                  <div key={variant.id}>
+                                    <p>
+                                      Varyant Özellikleri: {variant.detail_name}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                    </TableCell>
+                    <TableCell>
+                      <Accordion>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography>Ekstra Özellikler</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <div>
+                            {/* Display additional features details */}
+                            {Array.isArray(additionalFeatureDetails) &&
+                              additionalFeatureDetails
+                                .filter(
+                                  (feature) => feature.product_id === product.id
+                                )
+                                .map((feature) => (
+                                  <div key={feature.id}>
+                                    <p>
+                                      Ek Özellik:
+                                      {feature.additional_feature_name}
+                                    </p>
+                                    <p>Detaylar: {feature.details}</p>
+                                  </div>
+                                ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                    </TableCell>
+                    <TableCell>
+                      <img
+                        src={product.image_data}
+                        alt={product.name}
+                        style={{ width: 50 }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() => handleDelete(product.id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </AccordionDetails>
+      </Accordion>
     </Box>
   );
 }

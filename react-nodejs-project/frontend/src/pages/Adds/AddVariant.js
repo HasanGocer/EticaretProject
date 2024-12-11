@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
@@ -11,8 +10,12 @@ import {
   ListItem,
   IconButton,
   Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // AddVariant Bileşeni
 function AddVariant() {
@@ -105,39 +108,47 @@ function AddVariant() {
         </Grid>
       </form>
 
-      <Typography variant="h6" sx={{ marginTop: "20px" }}>
-        Varyant Listesi
-      </Typography>
-      <List
-        sx={{
-          maxHeight: "300px",
-          overflowY: "auto",
-          border: "1px solid #ddd",
-          borderRadius: "5px",
-          padding: "10px",
-        }}
-      >
-        {variants.map((variant) => (
-          <ListItem
-            key={variant.ID}
+      <Accordion sx={{ marginTop: "20px" }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography variant="h6">Varyant Listesi</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <List
             sx={{
-              justifyContent: "space-between",
-              backgroundColor: "#f8f9fa",
-              marginBottom: "8px",
+              maxHeight: "300px",
+              overflowY: "auto",
+              border: "1px solid #ddd",
               borderRadius: "5px",
+              padding: "10px",
             }}
           >
-            <Typography>{variant.UrunAdi}</Typography>
-            <IconButton
-              onClick={() => handleDelete(variant.ID)}
-              color="error"
-              sx={{ padding: "8px" }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </ListItem>
-        ))}
-      </List>
+            {variants.map((variant) => (
+              <ListItem
+                key={variant.ID}
+                sx={{
+                  justifyContent: "space-between",
+                  backgroundColor: "#f8f9fa",
+                  marginBottom: "8px",
+                  borderRadius: "5px",
+                }}
+              >
+                <Typography>{variant.UrunAdi}</Typography>
+                <IconButton
+                  onClick={() => handleDelete(variant.ID)}
+                  color="error"
+                  sx={{ padding: "8px" }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItem>
+            ))}
+          </List>
+        </AccordionDetails>
+      </Accordion>
     </Box>
   );
 }

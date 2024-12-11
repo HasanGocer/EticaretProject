@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Alert,
+  DialogTitle,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+} from "@mui/material";
 import axios from "axios";
-import "./EditTrademark.css";
 
 function EditTrademark() {
   const [message, setMessage] = useState("");
@@ -44,33 +57,58 @@ function EditTrademark() {
   }, []);
 
   return (
-    <div className="container">
-      <h2 className="heading">Trademark Düzenle</h2>
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <Typography variant="h4" align="center" gutterBottom>
+        Marka Düzenle
+      </Typography>
 
-      {message && <p className="message">{message}</p>}
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
 
-      <h3>Trademark Listesi</h3>
-      <ul className="trademark-list">
-        {trademarks.map((trademark) => (
-          <li key={trademark.ID} className="trademark-item">
-            <span>{trademark.UrunAdi}</span>
-            <button
-              className="edit-button"
-              onClick={() => setEditingTrademark({ ...trademark })}
+      <Typography variant="h5" gutterBottom>
+        Marka Listesi
+      </Typography>
+      <Paper sx={{ padding: 2 }}>
+        <List>
+          {trademarks.map((trademark) => (
+            <ListItem
+              key={trademark.ID}
+              secondaryAction={
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setEditingTrademark({ ...trademark })}
+                >
+                  Düzenle
+                </Button>
+              }
             >
-              Düzenle
-            </button>
-          </li>
-        ))}
-      </ul>
+              <ListItemText primary={trademark.UrunAdi} />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
 
       {/* Düzenleme Modalı */}
       {editingTrademark && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Trademark'ı Düzenle</h3>
-            <input
-              type="text"
+        <Dialog open={!!editingTrademark} onClose={closeEditModal}>
+          <DialogTitle>Trademark'ı Düzenle</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Ürün Adı"
               value={editingTrademark.UrunAdi}
               onChange={(e) =>
                 setEditingTrademark({
@@ -78,20 +116,24 @@ function EditTrademark() {
                   UrunAdi: e.target.value,
                 })
               }
-              className="input-field"
+              sx={{ mt: 2 }}
             />
-            <div className="modal-actions">
-              <button className="button" onClick={updateTrademark}>
-                Kaydet
-              </button>
-              <button className="button cancel-button" onClick={closeEditModal}>
-                İptal
-              </button>
-            </div>
-          </div>
-        </div>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={updateTrademark}
+            >
+              Kaydet
+            </Button>
+            <Button variant="outlined" color="error" onClick={closeEditModal}>
+              İptal
+            </Button>
+          </DialogActions>
+        </Dialog>
       )}
-    </div>
+    </Box>
   );
 }
 

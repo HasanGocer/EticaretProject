@@ -54,6 +54,7 @@ function Admin() {
   const handleSelectChange = (event) => {
     const newPage = event.currentTarget.value;
     setSelectedPage(newPage);
+    setSelectedPanel("");
   };
 
   return (

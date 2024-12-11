@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
   Button,
   Typography,
   TextField,
+  Alert,
   List,
   ListItem,
   ListItemText,
@@ -13,8 +13,6 @@ import {
   Paper,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-import "./AddAdditionalFeature.css";
 
 function AddAdditionalFeature() {
   const [additionalfeature, setAdditionalfeature] = useState("");
@@ -65,10 +63,24 @@ function AddAdditionalFeature() {
   }, []);
 
   return (
-    <Box className="container" p={3}>
+    <Box
+      sx={{
+        maxWidth: "800px",
+        margin: "40px auto",
+        padding: "30px",
+        backgroundColor: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <Typography variant="h4" align="center" gutterBottom>
-        Additional Feature Yönetimi
+        Ek Özellik Ekleme
       </Typography>
+      {message && (
+        <Alert severity="info" sx={{ marginBottom: "20px" }}>
+          {message}
+        </Alert>
+      )}
 
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <form onSubmit={handleSubmit}>
@@ -81,17 +93,11 @@ function AddAdditionalFeature() {
             required
             sx={{ mb: 2 }}
           />
-          <Button type="submit" variant="contained" color="secondary" fullWidth>
+          <Button type="submit" variant="contained" color="primary" fullWidth>
             Ekle
           </Button>
         </form>
       </Paper>
-
-      {message && (
-        <Typography color="error" align="center" gutterBottom>
-          {message}
-        </Typography>
-      )}
 
       <Typography variant="h6" gutterBottom>
         Mevcut Additional Feature Listesi
@@ -103,8 +109,8 @@ function AddAdditionalFeature() {
             key={feature.ID}
             secondaryAction={
               <IconButton
-                edge="end"
-                aria-label="delete"
+                color="error"
+                sx={{ padding: "8px" }}
                 onClick={() => handleDelete(feature.ID)}
               >
                 <DeleteIcon />

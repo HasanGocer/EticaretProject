@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./AddTrademark.css";
-import { Link } from "react-router-dom";
 import {
   Box,
   Button,
   Typography,
   TextField,
-  Grid,
+  Alert,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -15,21 +13,38 @@ import {
   ListItem,
   IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 function AddTrademark() {
   const [trademark, setTrademark] = useState("");
   const [message, setMessage] = useState("");
   const [trademarks, setTrademarks] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   // Yeni trademark ekleme
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/add-trademark", {
-        trademark,
-      });
+      // Resmi base64 olarak encode edip gönderiyoruz
+      const formData = new FormData();
+      formData.append("trademark", trademark);
+      formData.append("image", imageFile);
+
+      const response = await axios.post(
+        "http://localhost:5000/add-trademark",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       setMessage(response.data.message);
+      setTrademark(""); // Formu sıfırlama
+      setImageFile(null); // Formu sıfırlama
+      setPreviewUrl(null); // Formu sıfırlama
       fetchTrademarks();
     } catch (error) {
       setMessage("Bir hata oluştu.");
@@ -41,8 +56,22 @@ function AddTrademark() {
     try {
       const response = await axios.get("http://localhost:5000/get-trademarks");
       setTrademarks(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Trademarkları alırken bir hata oluştu.", error);
+    }
+  };
+
+  // Resim dosyasını önizlemek için
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -69,15 +98,15 @@ function AddTrademark() {
       sx={{
         maxWidth: "800px",
         margin: "40px auto",
-        p: 3,
-        bgcolor: "white",
+        padding: "30px",
+        backgroundColor: "#fff",
         borderRadius: "8px",
-        boxShadow: 3,
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
       {/* Sayfa Başlığı */}
       <Typography variant="h4" align="center" gutterBottom>
-        Trademark Yönetimi
+        Marka Ekle
       </Typography>
 
       {/* Yeni Trademark Ekleme Formu */}
@@ -86,6 +115,11 @@ function AddTrademark() {
         onSubmit={handleSubmit}
         sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}
       >
+        {message && (
+          <Alert severity="info" sx={{ marginBottom: "20px" }}>
+            {message}
+          </Alert>
+        )}
         <TextField
           label="Yeni Trademark"
           variant="outlined"
@@ -93,16 +127,25 @@ function AddTrademark() {
           onChange={(e) => setTrademark(e.target.value)}
           required
         />
-        <Button variant="contained" color="success" type="submit">
+
+        {/* Dosya yükleme */}
+        <input type="file" accept="image/*" onChange={handleImageChange} />
+
+        {/* Resim önizlemesi */}
+        {previewUrl && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{ width: "100px", height: "100px", objectFit: "cover" }}
+            />
+          </Box>
+        )}
+
+        <Button variant="contained" color="primary" type="submit">
           Ekle
         </Button>
       </Box>
-
-      {message && (
-        <Typography variant="body1" align="center" color="error" gutterBottom>
-          {message}
-        </Typography>
-      )}
 
       {/* Trademark Listeleme Alanı */}
       <Typography variant="h6" gutterBottom>
@@ -131,13 +174,24 @@ function AddTrademark() {
                   mb: 1,
                 }}
               >
-                <Typography>{trademark.UrunAdi}</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <img
+                    src={trademark.image_data}
+                    alt={trademark.UrunAdi}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <Typography>{trademark.UrunAdi}</Typography>
+                </Box>
                 <IconButton
-                  color="error"
                   onClick={() => handleDelete(trademark.ID)}
-                  aria-label="Sil"
+                  color="error"
+                  sx={{ padding: "8px" }}
                 >
-                  🗑️
+                  <DeleteIcon />
                 </IconButton>
               </ListItem>
             ))}
