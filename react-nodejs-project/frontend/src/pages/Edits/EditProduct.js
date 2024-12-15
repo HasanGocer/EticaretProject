@@ -172,6 +172,16 @@ function EditProduct() {
       JSON.stringify(editingProduct.additionalfeatures_id)
     );
     data.append("image_data", editingProduct.image_data);
+    data.append("variant_details", JSON.stringify(selectedVariants));
+    data.append(
+      "additionalfeature_details",
+      JSON.stringify(selectedAdditionalFeatures)
+    );
+
+    console.log(editingProduct.variants_id);
+    console.log(editingProduct.additionalfeatures_id);
+    console.log(selectedVariants);
+    console.log(selectedAdditionalFeatures);
 
     // Add variant details if present
     if (editingProduct.variant_details) {
@@ -218,25 +228,21 @@ function EditProduct() {
   const handleVariantsCheckboxChange = (e, variantID) => {
     const { checked } = e.target;
 
-    // Eğer checkbox işaretlendiyse, varyantı seçili hale getir.
     setEditingProduct((prev) => ({
       ...prev,
       variants_id: checked
-        ? [...prev.variants_id, variantID] // Varyant ekle
-        : prev.variants_id.filter((id) => id !== variantID), // Varyantı kaldır
+        ? [...(prev.variants_id || []), variantID]
+        : (prev.variants_id || []).filter((id) => id !== variantID),
     }));
 
-    // Seçilen varyantları güncelle
-    setSelectedVariants((prev) => {
-      if (checked) {
-        return [...prev, variantID];
-      } else {
-        return prev.filter((id) => id !== variantID);
-      }
-    });
+    if (checked) {
+      addVariantDetail(variantID); // Seçili bir varyant detayını otomatik ekle
+    } else {
+      removeVariantDetail(variantID); // Varyant kaldırıldığında detayları da sil
+    }
   };
   const handleVariantDetailChange = (variantID, newDetail) => {
-    setProductVariantsDetails((prevDetails) =>
+    setSelectedVariants((prevDetails) =>
       prevDetails.map((detail) =>
         detail.variant_id === variantID
           ? { ...detail, detail_name: newDetail }
@@ -245,17 +251,30 @@ function EditProduct() {
     );
   };
   const handleVariantImageChange = (variantID, file) => {
-    setProductVariantsDetails((prevDetails) =>
+    setSelectedVariants((prevDetails) =>
       prevDetails.map((detail) =>
         detail.variant_id === variantID
-          ? { ...detail, image_data: URL.createObjectURL(file) } // Resmi base64 veya URL olarak kaydet
+          ? { ...detail, image_data: URL.createObjectURL(file) }
           : detail
       )
     );
   };
+  const addVariantDetail = (variantID) => {
+    setSelectedVariants((prevDetails) => [
+      ...prevDetails,
+      { variant_id: variantID, detail_name: "", image_data: null },
+    ]);
+  };
+  const removeVariantDetail = (variantID) => {
+    setSelectedVariants((prevDetails) =>
+      prevDetails.filter((detail) => detail.variant_id !== variantID)
+    );
+  };
+
   const handleAdditionalFeaturesCheckboxChange = (e, featureID) => {
     const { checked } = e.target;
 
+    // 'editingProduct' ve 'selectedAdditionalFeatures' güncellemesi
     setEditingProduct((prev) => ({
       ...prev,
       additionalfeatures_id: checked
@@ -265,14 +284,21 @@ function EditProduct() {
 
     setSelectedAdditionalFeatures((prev) => {
       if (checked) {
-        return [...prev, featureID];
+        // Yeni özellik ekleniyor
+        return [
+          ...prev,
+          { additionalfeature_id: featureID, details: "" }, // Boş detayla ekle
+        ];
       } else {
-        return prev.filter((id) => id !== featureID);
+        // Özellik kaldırılıyor
+        return prev.filter(
+          (feature) => feature.additionalfeature_id !== featureID
+        );
       }
     });
   };
   const handleAdditionalFeatureDetailsChange = (featureID, field, value) => {
-    setProductAdditionalFeatureDetails((prevDetails) =>
+    setSelectedAdditionalFeatures((prevDetails) =>
       prevDetails.map((detail) =>
         detail.additionalfeature_id === featureID
           ? { ...detail, [field]: value }
@@ -280,17 +306,11 @@ function EditProduct() {
       )
     );
   };
-
-  const addVariantDetail = (variantID) => {
-    setProductVariantsDetails((prevDetails) => [
-      ...prevDetails,
-      { variant_id: variantID, detail_name: "", image_data: null },
-    ]);
-  };
-  const removeVariantDetail = (variantID, index) => {
-    setProductVariantsDetails((prevDetails) =>
-      prevDetails.filter((_, i) => i !== index || _.variant_id !== variantID)
+  const getFeatureDetailValue = (featureID) => {
+    const featureDetail = selectedAdditionalFeatures.find(
+      (detail) => detail.additionalfeature_id === featureID
     );
+    return featureDetail ? featureDetail.details : "";
   };
 
   //#endregion
@@ -302,7 +322,7 @@ function EditProduct() {
   }, []);
   useEffect(() => {
     if (editingTime && editingProduct) {
-      console.log("ek öz detay: ", productAdditionalFeatureDetails);
+      // Varyant ID'lerini tutma
       const tempSelectedVariantIds = productVariantsDetails
         .filter((proVar) => proVar.product_id === editingProduct.id)
         .map(
@@ -312,6 +332,12 @@ function EditProduct() {
         )
         .filter((id) => id);
 
+      // Varyantların product_id'lerini tutma
+      const tempVariantProductIds = productVariantsDetails
+        .filter((proVar) => proVar.product_id === editingProduct.id)
+        .map((proVar) => proVar);
+
+      // Ek Özellik ID'lerini tutma
       const tempSelectedFeatureIds = productAdditionalFeatureDetails
         .filter((proAdd) => proAdd.product_id === editingProduct.id)
         .map(
@@ -322,12 +348,20 @@ function EditProduct() {
         )
         .filter((id) => id);
 
+      // Ek Özelliklerin product_id'lerini tutma
+      const tempFeatureProductIds = productAdditionalFeatureDetails
+        .filter((proAdd) => proAdd.product_id === editingProduct.id)
+        .map((proAdd) => proAdd);
+
+      setSelectedAdditionalFeatures(tempFeatureProductIds);
+      setSelectedVariants(tempVariantProductIds);
       setEditingProduct((prev) => ({
         ...prev,
         variants_id: tempSelectedVariantIds,
         additionalfeatures_id: tempSelectedFeatureIds,
       }));
     }
+    console.log(editingProduct);
   }, [editingTime]);
 
   return (
@@ -656,15 +690,15 @@ function EditProduct() {
                     />
                     {editingProduct?.variants_id?.includes(variant.ID) && (
                       <>
-                        {productVariantsDetails
+                        {selectedVariants
                           .filter((vars) => vars.variant_id === variant.ID)
                           .map((vars, index) => (
-                            <div key={vars.ID}>
+                            <div key={index}>
                               {/* Varyant Ek Özelliği TextField */}
                               <TextField
                                 label="Varyant Ek Özelliği"
                                 variant="outlined"
-                                value={vars.detail_name}
+                                value={vars.detail_name || ""}
                                 onChange={(e) =>
                                   handleVariantDetailChange(
                                     variant.ID,
@@ -772,16 +806,11 @@ function EditProduct() {
                       <TextField
                         label="Ekstra Özellik Detayı"
                         variant="outlined"
-                        value={productAdditionalFeatureDetails
-                          .filter(
-                            (details) =>
-                              details.additionalfeature_id === feature.ID
-                          )
-                          .map((details) => details.details)
-                          .join(", ")}
+                        value={getFeatureDetailValue(feature.ID)} // Detayı almak için yeni fonksiyon
                         onChange={(e) =>
                           handleAdditionalFeatureDetailsChange(
                             feature.ID,
+                            "details",
                             e.target.value
                           )
                         }

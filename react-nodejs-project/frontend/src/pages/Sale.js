@@ -15,7 +15,7 @@ const Sale = () => {
     try {
       const response = await axios.get("http://localhost:5000/get-products");
       const fetchedProducts = response.data;
-
+      console.log(fetchedProducts);
       if (fetchedProducts.length < 20) {
         const remainingProducts = [...fetchedProducts];
         const missingProducts = 20 - fetchedProducts.length;

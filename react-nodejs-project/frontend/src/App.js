@@ -19,7 +19,6 @@ import Payment from "./pages/Payment";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFoundP";
 import ProductDetail from "./pages/Product";
-import ProductPage from "./pages/ProductPage";
 import Header from "./pages/Header";
 import Login from "./pages/Registration/Login";
 import Register from "./pages/Registration/Register";
@@ -49,6 +48,7 @@ function App() {
                 bannerVisible={bannerVisible}
                 closeBanner={closeBanner}
               />
+              <Sale></Sale>
             </div>
           )}
 
@@ -72,7 +72,6 @@ function App() {
             />
             <Route path="/admin/EditUsers" element={<EditUsers />} />
             <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/ProductPage" element={<ProductPage />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/Register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />

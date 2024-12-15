@@ -93,7 +93,9 @@ export const CartProvider = ({ children }) => {
 
   // Sepet için ek bir kontrol veya işlem yapmak isteyenler için bu fonksiyonu döndürüyoruz
   const cartTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
+    return cartItems
+      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .toFixed(2);
   };
 
   return (
