@@ -1,70 +1,105 @@
 CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    image_data VARCHAR(2083) NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    image_data VARCHAR(500),
+    name VARCHAR(255),
+    price DECIMAL(10,2),
+    stockCode VARCHAR(255),
+    stockQuantity INT,
+    discountRate DECIMAL(5,2),
+    trademark_id INT,
+    category_id INT,
+    subcategory_id INT,
+    additionalfeatures_id INT,
+    variants_id INT,
+    description TEXT
+);
+CREATE TABLE additionalfeatures (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
+CREATE TABLE variants (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
+CREATE TABLE trademarks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    stockCode VARCHAR(50) NOT NULL,
-    stockQuantity INT NOT NULL,
-    discountRate DECIMAL(5,2) NOT NULL,
-    trademark_id INT NOT NULL,
-    category_id INT NOT NULL,
-    subcategory_id INT NOT NULL,
-    additionalfeatures_id INT DEFAULT NULL,
-    variants_id INT DEFAULT NULL,
-    description TEXT,
-    FOREIGN KEY (trademark_id) REFERENCES trademarks(id),
-    FOREIGN KEY (category_id) REFERENCES categorys(id),
-    FOREIGN KEY (additionalfeatures_id) REFERENCES additionalfeatures(id),
-    FOREIGN KEY (variants_id) REFERENCES variants(id)
+    image_data VARCHAR(500)
 );
-
-CREATE TABLE product_additionalfeatures (
-    product_id INT NOT NULL,
-    additionalfeature_id INT NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES products(id),
-    FOREIGN KEY (additionalfeature_id) REFERENCES additionalfeatures(id),
-    PRIMARY KEY (product_id, additionalfeature_id) -- Birleştirilmiş anahtar tanımı
+CREATE TABLE categorys (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
 );
-
-CREATE TABLE product_variants (
-    product_id INT NOT NULL,
-    variant_id INT NOT NULL,
-    PRIMARY KEY (product_id, variant_id),
-    FOREIGN KEY (product_id) REFERENCES products(id),
-    FOREIGN KEY (variant_id) REFERENCES variants(id)
-);
-
-CREATE TABLE product_variant_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT NOT NULL,
-    variant_id INT NOT NULL,
-    image_data VARCHAR(2083) DEFAULT NULL,
-    name VARCHAR(100) DEFAULT NULL,
-    FOREIGN KEY (product_id, variant_id) REFERENCES product_variants(product_id, variant_id)
-);
-
-CREATE TABLE product_additionalfeatures_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT NOT NULL,
-    additionalfeature_id INT NOT NULL,
-    details VARCHAR(255) DEFAULT NULL,
-    FOREIGN KEY (product_id, additionalfeature_id) REFERENCES product_additionalfeatures(product_id, additionalfeature_id),
-    UNIQUE (product_id, additionalfeature_id, details) -- Benzersiz kısıtlama
-);
-
 CREATE TABLE subcategorys (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    category_id INT NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    FOREIGN KEY (category_id) REFERENCES categorys(id)
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    category_id INT,
+    name VARCHAR(255)
+);
+CREATE TABLE product_additionalfeatures (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    additionalfeature_id INT,
+    PRIMARY KEY (product_id, additionalfeature_id)
+);
+CREATE TABLE product_additionalfeatures_details (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    additionalfeature_id INT,
+    details VARCHAR(255)
+);
+CREATE TABLE product_variants (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    variant_id INT,
+    PRIMARY KEY (product_id, variant_id)
+);
+CREATE TABLE product_variant_details (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    variant_id INT,
+    details VARCHAR(255)
+);
+CREATE TABLE orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    order_number BIGINT,
+    order_date DATETIME,
+    delivery_date DATETIME,
+    status VARCHAR(255),
+    items JSON
+);
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    firstName VARCHAR(255),
+    lastName VARCHAR(255),
+    email VARCHAR(255),
+    password VARCHAR(255),
+    phone VARCHAR(20),
+    nationalId VARCHAR(20),
+    gender VARCHAR(10),
+    createdAt DATETIME,
+    updatedAt DATETIME
 );
 
-CREATE TABLE orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    order_number INT NOT NULL,
-    order_date DATETIME NOT NULL,
-    delivery_date DATETIME NOT NULL,
-    status VARCHAR(255) NOT NULL,
-    items JSON NOT NULL
-);
+
+
+
+
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject
+GIT_SSH_COMMAND='ssh -i /root/.ssh/id_ed25519' git pull origin main
+
+
+
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/frontend
+npm run build
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/backend
+rm -rf public
+rm -rf build
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/frontend
+mv build ../backend 
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/backend
+cp -r build public
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject
+git add .
+git commit -m "Güncellemeler eklendi"
+GIT_SSH_COMMAND='ssh -i /root/.ssh/id_ed25519' git push origin main
