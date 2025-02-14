@@ -90,14 +90,14 @@ GIT_SSH_COMMAND='ssh -i /root/.ssh/id_ed25519' git pull origin main
 
 
 
-cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/frontend
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/react-nodejs-project/frontend
 npm run build
-cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/backend
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/react-nodejs-project/backend
 rm -rf public
 rm -rf build
-cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/frontend
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/react-nodejs-project/frontend
 mv build ../backend 
-cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/backend
+cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject/react-nodejs-project/backend
 cp -r build public
 cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject
 git add .
