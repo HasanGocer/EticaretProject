@@ -194,7 +194,13 @@ const Header = () => {
 
       {/* İçerik */}
       <Container
-        sx={{ marginTop: bannerVisible ? "100px" : "60px", minHeight: "80vh" }}
+        position="fixed"
+        sx={{
+          marginTop: bannerVisible ? "100px" : "60px",
+          backgroundColor: "#ff6f00",
+          transition: "top 0.3s ease-in-out",
+          minHeight: "80vh",
+        }}
       >
         <Typography
           variant="h4"
