@@ -24,20 +24,26 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const Header = ({ bannerVisible, closeBanner }) => {
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [isAcountOpen, setIsAcountOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [isAcountOpen, setIsAcountOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   const logo = "/AdAstraYazLogo.png";
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
     useCart();
 
   function HideOnScroll(props) {
     const { children } = props;
-    const trigger = useScrollTrigger();
+    const trigger = useScrollTrigger({
+      threshold: 100, // 100px aşağı inince gizlenir
+    });
 
     return (
       <Slide in={!trigger} direction="down">
@@ -45,11 +51,26 @@ const Header = ({ bannerVisible, closeBanner }) => {
       </Slide>
     );
   }
-
   const toggleCart = () => setIsOpen(!isOpen);
   const toggleAccountPanel = () => {
     setIsAcountOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > lastScrollY && window.scrollY > 150) {
+        setShowHeader(false); // Aşağı kaydırınca gizle
+      } else {
+        setShowHeader(true); // Yukarı kaydırınca göster
+      }
+      setLastScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
   useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
     if (currentUser) {
@@ -135,196 +156,144 @@ const Header = ({ bannerVisible, closeBanner }) => {
 
   return (
     <>
-      {bannerVisible && (
-        <HideOnScroll>
-          <AppBar
-            position="fixed"
-            sx={{
-              minHeight: "20vh",
-              maxHeight: "20vh",
-              width: "100%",
-              backgroundColor: "transparent",
-              zIndex: 1100,
-              boxShadow: "none",
-            }}
-          >
-            <Toolbar>
-              <p className="banner-text">
-                550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
-              </p>
-              <button onClick={closeBanner} className="banner-close-button">
-                X
-              </button>
-            </Toolbar>
-          </AppBar>
-        </HideOnScroll>
-      )}
-      <header className="fixedHeader">
-        <div
-          className="logo"
-          style={{
-            top: "0%",
-            height: "100vh",
-          }}
-        >
-          <img
-            src={logo}
-            alt="Ad Astra Yazılım Logo"
-            style={{
-              filter: "invert(100%) grayscale(100%)",
-              maxWidth: "300px",
-              mainWidth: "300px",
-              height: "auto",
-            }}
-          />
-        </div>
-        <Box
+      <HideOnScroll>
+        <AppBar
+          position="fixed"
           sx={{
-            padding: 3,
-            minWidth: "600px",
-            maxWidth: "600px",
-            margin: "auto",
-            position: "relative",
+            minHeight: "20vh",
+            maxHeight: "20vh",
+            width: "100%",
+            backgroundColor: "transparent",
+            zIndex: 1100,
+            boxShadow: "none",
           }}
         >
-          <Typography variant="h5" component="h1" gutterBottom></Typography>
-          <TextField
-            fullWidth
-            label="Ürün adı ara..."
-            variant="outlined"
-            value={searchTerm}
-            onChange={handleSearchChange} // Kullanıcının yazdığı değer tetikler
-            sx={{ marginBottom: 3 }}
-          />
-          {/* Liste yalnızca bir şey yazıldığında açılır */}
-          {searchTerm.trim() && (
-            <Paper
-              elevation={3}
-              sx={{
-                padding: 2,
-                gap: 10,
-                position: "absolute",
-                zIndex: "20000",
-              }}
+          <Toolbar>
+            <p className="banner-text">
+              550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
+            </p>
+            <button
+              onClick={() => setBannerVisible(false)}
+              className="banner-close-button"
             >
-              <List>
-                {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product) => (
-                    <ListItem
-                      key={product.id}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: 2,
-                        padding: 3,
-                        height: "15px",
-                        minWidth: "500px",
-                        maxWidth: "500px",
-                      }}
-                    >
-                      <img
-                        src={product.image_data}
-                        alt={product.name}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "5px",
-                          marginRight: "15px",
-                        }}
-                      />
-                      <ListItemText primary={product.name} />
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ minWidth: "500px", maxWidth: "500px" }}
-                  >
-                    Eşleşen ürün bulunamadı.
-                  </Typography>
-                )}
-              </List>
-            </Paper>
-          )}
-        </Box>
-        <Button
-          variant="contained"
-          onClick={toggleCart}
-          sx={{
-            position: "absolute",
-            top: "30%",
-            right: "10px",
-            height: "50px",
-            width: "150px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between", // Sol ve sağ öğeleri birbirinden ayırmak için
-            background: "white",
-            border: "1px solid #ccc",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": {
-              backgroundColor: "#ffd54f",
-            },
-          }}
-        >
-          {/* Sol taraftaki simge */}
-          <Badge
-            badgeContent={cartItems.length}
-            color="error"
-            sx={{
-              left: 0,
-              ".MuiBadge-dot": {
-                backgroundColor: "red",
-              },
-            }}
-          >
-            <ShoppingCartIcon
-              sx={{
-                color: "#ff6f00",
-                fontSize: "20px",
+              X
+            </button>
+          </Toolbar>
+        </AppBar>
+      </HideOnScroll>
+
+      {/* Ana Header */}
+      <Slide in={showHeader} direction="down">
+        <header className="fixedHeader">
+          <div className="logo" style={{ top: "0%", height: "100vh" }}>
+            <img
+              src={logo}
+              alt="Ad Astra Yazılım Logo"
+              style={{
+                filter: "invert(100%) grayscale(100%)",
+                maxWidth: "300px",
+                height: "auto",
               }}
             />
-          </Badge>
-
-          {/* Sağ tarafta fiyat */}
-          <Typography
+          </div>
+          <Box
             sx={{
+              padding: 3,
+              minWidth: "600px",
+              maxWidth: "600px",
+              margin: "auto",
+              position: "relative",
+            }}
+          >
+            <Typography variant="h5" component="h1" gutterBottom></Typography>
+            <TextField
+              fullWidth
+              label="Ürün adı ara..."
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              sx={{ marginBottom: 3 }}
+            />
+            {searchTerm.trim() && (
+              <Paper
+                elevation={3}
+                sx={{ padding: 2, position: "absolute", zIndex: "20000" }}
+              >
+                <List>
+                  {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product) => (
+                      <ListItem
+                        key={product.id}
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <img
+                          src={product.image_data}
+                          alt={product.name}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            borderRadius: "5px",
+                            marginRight: "15px",
+                          }}
+                        />
+                        <ListItemText primary={product.name} />
+                      </ListItem>
+                    ))
+                  ) : (
+                    <Typography variant="body1" color="text.secondary">
+                      Eşleşen ürün bulunamadı.
+                    </Typography>
+                  )}
+                </List>
+              </Paper>
+            )}
+          </Box>
+          <Button
+            variant="contained"
+            onClick={toggleCart}
+            sx={{
+              position: "absolute",
+              top: "30%",
+              right: "10px",
+              height: "50px",
+              width: "150px",
+              background: "white",
+              border: "1px solid #ccc",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              "&:hover": { backgroundColor: "#ffd54f" },
+            }}
+          >
+            <Badge badgeContent={cartItems.length} color="error">
+              <ShoppingCartIcon sx={{ color: "#ff6f00", fontSize: "20px" }} />
+            </Badge>
+            <Typography
+              sx={{ fontSize: "12px", fontWeight: "bold", color: "#333" }}
+            >
+              {cartTotal()} TL
+            </Typography>
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => handleAcount()}
+            sx={{
+              position: "absolute",
+              top: "30%",
+              right: "170px",
+              height: "50px",
+              width: "150px",
+              background: "white",
+              border: "1px solid #ccc",
               fontSize: "12px",
               fontWeight: "bold",
               color: "#333",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              "&:hover": { backgroundColor: "#ffd54f" },
             }}
           >
-            {cartTotal()} TL
-          </Typography>
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => handleAcount()}
-          sx={{
-            position: "absolute",
-            top: "30%",
-            right: "170px",
-            height: "50px",
-            width: "150px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "white",
-            border: "1px solid #ccc",
-            fontSize: "12px",
-            fontWeight: "bold",
-            color: "#333",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": {
-              backgroundColor: "#ffd54f",
-            },
-          }}
-        >
-          {/* Koşullu render işlemi */}
-          {AuthService.getCurrentUser() ? "HESABIM" : "GİRİŞ/KAYIT"}
-        </Button>
-      </header>
+            {AuthService.getCurrentUser() ? "HESABIM" : "GİRİŞ/KAYIT"}
+          </Button>
+        </header>
+      </Slide>
 
       <header
         className={`header ${
