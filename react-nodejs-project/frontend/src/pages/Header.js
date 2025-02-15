@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import axios from "axios";
 import {
   Box,
+  Container,
   Button,
   AppBar,
   Toolbar,
@@ -21,6 +22,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CloseIcon from "@mui/icons-material/Close";
 
 const Header = () => {
   const navigate = useNavigate();
