@@ -35,7 +35,7 @@ CREATE TABLE product_additionalfeatures (
     id INT PRIMARY KEY AUTO_INCREMENT,
     product_id INT,
     additionalfeature_id INT,
-    PRIMARY KEY (product_id, additionalfeature_id)
+    UNIQUE (product_id, additionalfeature_id)
 );
 CREATE TABLE product_additionalfeatures_details (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -50,7 +50,7 @@ CREATE TABLE product_variants (
     id INT PRIMARY KEY AUTO_INCREMENT,
     product_id INT,
     variant_id INT,
-    PRIMARY KEY (product_id, variant_id)
+    UNIQUE (product_id, variant_id)
 );
 CREATE TABLE product_variant_details (
     id INT PRIMARY KEY AUTO_INCREMENT,

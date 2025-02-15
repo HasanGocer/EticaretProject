@@ -3,9 +3,9 @@ import mysql from "mysql2";
 
 const db = mysql.createConnection({
   host: "localhost", // veya kullanılan veritabanı sunucusu
-  user: "evpakademidb",
-  password: "8!a9nF80h", // veritabanı şifrenizi buraya yazın
-  database: "admin_evpakademi", // veritabanı ismini buraya yazın
+  user: "shopAdminDB",
+  password: "9tn9&E98w", // veritabanı şifrenizi buraya yazın
+  database: "admin_shopEvipy", // veritabanı ismini buraya yazın
 });
 
 db.connect((err) => {
