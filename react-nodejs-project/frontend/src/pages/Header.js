@@ -33,17 +33,20 @@ const Header = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [bannerVisible, setBannerVisible] = useState(true); // Banner'ı kapatmak için state
+  const [bannerVisible, setBannerVisible] = useState(true);
+  const [navHidden, setNavHidden] = useState(false);
 
   const logo = "/AdAstraYazLogo.png";
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
     useCart();
 
   function HideOnScroll(props) {
-    const { children } = props;
-    const trigger = useScrollTrigger({
-      threshold: 100, // 100px aşağı inince gizlenir
-    });
+    const { children, onHide } = props;
+    const trigger = useScrollTrigger({ threshold: 100 });
+
+    useEffect(() => {
+      onHide(trigger);
+    }, [trigger, onHide]);
 
     return (
       <Slide in={!trigger} direction="down">
@@ -172,43 +175,48 @@ const Header = () => {
         </Box>
       )}
 
-      {/* Navigasyon Çubuğu */}
-      <AppBar
-        position="fixed"
-        sx={{
-          top: bannerVisible ? "40px" : "0px",
-          backgroundColor: "#ff6f00",
-          transition: "top 0.3s ease-in-out",
-          zIndex: 1200,
-        }}
-      >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", color: "white" }}>
-            Mağazam
-          </Typography>
-          <Button sx={{ color: "white" }}>
-            <ShoppingCartIcon />
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <HideOnScroll onHide={setNavHidden}>
+        <AppBar
+          position="fixed"
+          sx={{
+            top: bannerVisible ? "40px" : "0px",
+            backgroundColor: "#ff6f00",
+            transition: "top 0.3s ease-in-out",
+            zIndex: 1200,
+          }}
+        >
+          <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "white" }}
+            >
+              Mağazam
+            </Typography>
+            <Button sx={{ color: "white" }}>
+              <ShoppingCartIcon />
+            </Button>
+          </Toolbar>
+        </AppBar>
+      </HideOnScroll>
 
-      {/* İçerik */}
       <AppBar
         position="fixed"
         sx={{
-          marginTop: bannerVisible ? "100px" : "60px",
+          top: navHidden ? (bannerVisible ? "40px" : "0px") : "60px", // HideOnScroll kaybolunca yukarı çık
           backgroundColor: "#ff6f00",
           transition: "top 0.3s ease-in-out",
           maxHeight: "10vh",
-          weight: "100vh",
+          zIndex: 1100,
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{ marginBottom: "20px", textAlign: "center" }}
-        >
-          Hoşgeldiniz
-        </Typography>
+        <Toolbar>
+          <Typography
+            variant="h4"
+            sx={{ marginBottom: "20px", textAlign: "center", width: "100%" }}
+          >
+            Hoşgeldiniz
+          </Typography>
+        </Toolbar>
       </AppBar>
 
       {/* Alt Çubuk */}
