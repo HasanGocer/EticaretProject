@@ -12,6 +12,8 @@ import {
   List,
   ListItem,
   ListItemText,
+  useScrollTrigger,
+  Slide,
   IconButton,
   Paper,
   Badge,
@@ -132,19 +134,14 @@ const Header = ({ bannerVisible, closeBanner }) => {
   return (
     <>
       {bannerVisible && (
-        <div
-          className="banner"
-          style={{
-            opacity: Math.max(1 - scrollPosition / 200, 0), // Sayfa kaydırıldıkça azal
-          }}
-        >
+        <HideOnScroll>
           <p className="banner-text">
             550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
           </p>
           <button onClick={closeBanner} className="banner-close-button">
             X
           </button>
-        </div>
+        </HideOnScroll>
       )}
       <header className="fixedHeader">
         <div
