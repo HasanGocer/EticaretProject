@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import { useCart } from "../context/CartContext";
-import logo from ".../public/AdAstraYazLogo.png";
 import axios from "axios";
 import "./Header.css";
 import {
@@ -28,6 +27,7 @@ const Header = ({ bannerVisible, closeBanner }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [isAcountOpen, setIsAcountOpen] = useState(false);
+  const logo = "/AdAstraYazLogo.png";
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
     useCart();
 
