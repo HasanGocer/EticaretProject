@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import { useCart } from "../context/CartContext";
-import { FaShoppingCart } from "react-icons/fa";
 import logo from "./AdAstraYazLogo.png";
 import axios from "axios";
 import "./Header.css";
@@ -25,13 +24,23 @@ const Header = ({ bannerVisible, closeBanner }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [isAcountOpen, setIsAcountOpen] = useState(false);
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
     useCart();
+
+  function HideOnScroll(props) {
+    const { children } = props;
+    const trigger = useScrollTrigger();
+
+    return (
+      <Slide in={!trigger} direction="down">
+        {children}
+      </Slide>
+    );
+  }
 
   const toggleCart = () => setIsOpen(!isOpen);
   const toggleAccountPanel = () => {
@@ -43,11 +52,6 @@ const Header = ({ bannerVisible, closeBanner }) => {
       setUser(currentUser);
     }
     fetchProducts();
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
   }, []);
   const fetchProducts = async () => {
     try {
@@ -86,10 +90,6 @@ const Header = ({ bannerVisible, closeBanner }) => {
   const handleOrder = () => {
     navigate("/Order");
     window.location.reload();
-  };
-
-  const handleScroll = () => {
-    setScrollPosition(window.scrollY);
   };
 
   const handleAcount = () => {

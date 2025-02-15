@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider, Box } from "@mui/material";
 import theme from "./theme";
 
 import AddProduct from "./pages/Adds/AddProduct";
@@ -49,6 +49,35 @@ function App() {
                 closeBanner={closeBanner}
               />
               <Sale></Sale>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
+              <Box>HG</Box>
             </div>
           )}
 

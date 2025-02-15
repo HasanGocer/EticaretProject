@@ -53,8 +53,6 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Sunucu hatası." });
   }
 });
-
-// Kullanıcı girişi
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -84,8 +82,6 @@ router.post("/login", (req, res) => {
     res.status(200).json({ token, user });
   });
 });
-
-// Kullanıcı bilgilerini güncelle
 router.put("/update/:id", (req, res) => {
   const { id } = req.params;
   const { firstName, lastName, email, phone, nationalId, gender } = req.body;

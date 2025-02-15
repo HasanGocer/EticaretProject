@@ -103,3 +103,10 @@ cd /var/www/vhosts/evpakademi.com/EvipyShop/EticaretProject
 git add .
 git commit -m "Güncellemeler eklendi"
 GIT_SSH_COMMAND='ssh -i /root/.ssh/id_ed25519' git push origin main
+
+
+
+sudo systemctl restart mariadb
+sudo systemctl restart httpd
+pm2 restart shopserver
+sudo reboot
