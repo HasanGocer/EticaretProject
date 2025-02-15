@@ -100,7 +100,7 @@ const Header = () => {
     window.location.reload();
   };
 
-  const handleAcount = () => {
+  const handleAccount = () => {
     if (AuthService.getCurrentUser()) {
       toggleAccountPanel();
       setUser(AuthService.getCurrentUser());
