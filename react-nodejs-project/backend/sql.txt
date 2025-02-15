@@ -13,14 +13,6 @@ CREATE TABLE products (
     variants_id INT,
     description TEXT
 );
-CREATE TABLE additionalfeatures (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
-);
-CREATE TABLE variants (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
-);
 CREATE TABLE trademarks (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
@@ -35,6 +27,10 @@ CREATE TABLE subcategorys (
     category_id INT,
     name VARCHAR(255)
 );
+CREATE TABLE additionalfeatures (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
 CREATE TABLE product_additionalfeatures (
     id INT PRIMARY KEY AUTO_INCREMENT,
     product_id INT,
@@ -43,9 +39,12 @@ CREATE TABLE product_additionalfeatures (
 );
 CREATE TABLE product_additionalfeatures_details (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    product_id INT,
-    additionalfeature_id INT,
+    product_additionalfeatures INT,
     details VARCHAR(255)
+);
+CREATE TABLE variants (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
 );
 CREATE TABLE product_variants (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -55,8 +54,8 @@ CREATE TABLE product_variants (
 );
 CREATE TABLE product_variant_details (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    product_id INT,
-    variant_id INT,
+    product_variants INT,
+    image_data VARCHAR(500),
     details VARCHAR(255)
 );
 CREATE TABLE orders (
@@ -70,16 +69,17 @@ CREATE TABLE orders (
 );
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    firstName VARCHAR(255),
-    lastName VARCHAR(255),
-    email VARCHAR(255),
-    password VARCHAR(255),
-    phone VARCHAR(20),
-    nationalId VARCHAR(20),
-    gender VARCHAR(10),
-    createdAt DATETIME,
-    updatedAt DATETIME
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    nationalId VARCHAR(20) NOT NULL UNIQUE,
+    gender ENUM('male', 'female', 'other') NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 
 
