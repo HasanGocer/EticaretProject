@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import { useCart } from "../context/CartContext";
-import logo from "./AdAstraYazLogo.png";
+import logo from ".../public/AdAstraYazLogo.png";
 import axios from "axios";
 import "./Header.css";
 import {
