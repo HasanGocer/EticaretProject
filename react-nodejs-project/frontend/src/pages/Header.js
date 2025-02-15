@@ -34,6 +34,7 @@ const Header = ({ bannerVisible, closeBanner }) => {
 
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [bannerVisible, setBannerVisible] = useState(true); // Banner'ı kapatmak için state
 
   const logo = "/AdAstraYazLogo.png";
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
@@ -156,31 +157,33 @@ const Header = ({ bannerVisible, closeBanner }) => {
 
   return (
     <>
-      <HideOnScroll>
-        <AppBar
-          position="fixed"
-          sx={{
-            minHeight: "20vh",
-            maxHeight: "20vh",
-            width: "100%",
-            backgroundColor: "transparent",
-            zIndex: 1100,
-            boxShadow: "none",
-          }}
-        >
-          <Toolbar>
-            <p className="banner-text">
-              550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
-            </p>
-            <button
-              onClick={() => setBannerVisible(false)}
-              className="banner-close-button"
-            >
-              X
-            </button>
-          </Toolbar>
-        </AppBar>
-      </HideOnScroll>
+      {bannerVisible && (
+        <HideOnScroll>
+          <AppBar
+            position="fixed"
+            sx={{
+              minHeight: "20vh",
+              maxHeight: "20vh",
+              width: "100%",
+              backgroundColor: "transparent",
+              zIndex: 1100,
+              boxShadow: "none",
+            }}
+          >
+            <Toolbar>
+              <p className="banner-text">
+                550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
+              </p>
+              <button
+                onClick={() => setBannerVisible(false)}
+                className="banner-close-button"
+              >
+                X
+              </button>
+            </Toolbar>
+          </AppBar>
+        </HideOnScroll>
+      )}
 
       {/* Ana Header */}
       <Slide in={showHeader} direction="down">
