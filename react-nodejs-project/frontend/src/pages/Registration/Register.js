@@ -1,5 +1,5 @@
-import React, { useState,useEffect } from "react";
-import AuthService from "../../services/auth.service";
+import React, { useState, useEffect } from "react";
+import AuthService from "../../Api's/auth.service";
 import "./Register.css";
 
 const Register = () => {
@@ -21,7 +21,7 @@ const Register = () => {
     const evenSum = digits[1] + digits[3] + digits[5] + digits[7];
 
     const check10 = (7 * oddSum - evenSum) % 10;
-    const check11 = (digits.slice(0, 10).reduce((a, b) => a + b, 0)) % 10;
+    const check11 = digits.slice(0, 10).reduce((a, b) => a + b, 0) % 10;
 
     return check10 === digits[9] && check11 === digits[10];
   };
@@ -34,7 +34,15 @@ const Register = () => {
       return;
     }
 
-    AuthService.register(firstName, lastName, email, password, phone, nationalId, gender)
+    AuthService.register(
+      firstName,
+      lastName,
+      email,
+      password,
+      phone,
+      nationalId,
+      gender
+    )
       .then(() => {
         alert("Kayıt başarılı!");
         window.location.href = "/";
@@ -45,123 +53,127 @@ const Register = () => {
         setErrorMessage(message);
       });
   };
-  
+
   useEffect(() => {
     if (AuthService.getCurrentUser()) {
-        window.location.href = "/profile";
+      window.location.href = "/profile";
     }
   }, []);
 
   return (
     <div className="register-container">
-   {!AuthService.getCurrentUser() && (
-  <div className="register-card">
-    <h1 className="register-title">Hesap Oluşturun</h1>
-    <p className="register-subtitle">Bize katılın ve alışverişe hemen başlayın!</p>
+      {!AuthService.getCurrentUser() && (
+        <div className="register-card">
+          <h1 className="register-title">Hesap Oluşturun</h1>
+          <p className="register-subtitle">
+            Bize katılın ve alışverişe hemen başlayın!
+          </p>
 
-    {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-    <form onSubmit={handleRegister} className="register-form">
-      {/* Ad */}
-      <div className="form-group">
-        <label>Ad</label>
-        <input
-          type="text"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          placeholder="Ad"
-          className="form-input"
-        />
-      </div>
+          <form onSubmit={handleRegister} className="register-form">
+            {/* Ad */}
+            <div className="form-group">
+              <label>Ad</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Ad"
+                className="form-input"
+              />
+            </div>
 
-      {/* Soyad */}
-      <div className="form-group">
-        <label>Soyad</label>
-        <input
-          type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          placeholder="Soyad"
-          className="form-input"
-        />
-      </div>
+            {/* Soyad */}
+            <div className="form-group">
+              <label>Soyad</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Soyad"
+                className="form-input"
+              />
+            </div>
 
-      {/* E-posta */}
-      <div className="form-group">
-        <label>E-posta</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-posta"
-          className="form-input"
-        />
-      </div>
+            {/* E-posta */}
+            <div className="form-group">
+              <label>E-posta</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="E-posta"
+                className="form-input"
+              />
+            </div>
 
-      {/* Telefon Numarası */}
-      <div className="form-group">
-        <label>Telefon Numarası (5xx xxx xxxx)</label>
-        <input
-          type="text"
-          value={phone}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-            if (value.startsWith('5') && value.length <= 10) {
-              setPhone(value);
-            }
-          }}
-          placeholder="Telefon Numarası"
-          className="form-input"
-          maxLength={10}
-        />
-      </div>
+            {/* Telefon Numarası */}
+            <div className="form-group">
+              <label>Telefon Numarası (5xx xxx xxxx)</label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // Only allow digits
+                  if (value.startsWith("5") && value.length <= 10) {
+                    setPhone(value);
+                  }
+                }}
+                placeholder="Telefon Numarası"
+                className="form-input"
+                maxLength={10}
+              />
+            </div>
 
-      {/* TC Kimlik Numarası */}
-      <div className="form-group">
-        <label>TC Kimlik Numarası</label>
-        <input
-          type="text"
-          value={nationalId}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-            if (value.length <= 11) {
-              setNationalId(value);
-            }
-          }}
-          placeholder="TC Kimlik Numarası"
-          className="form-input"
-          maxLength={11}
-        />
-      </div>
+            {/* TC Kimlik Numarası */}
+            <div className="form-group">
+              <label>TC Kimlik Numarası</label>
+              <input
+                type="text"
+                value={nationalId}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // Only allow digits
+                  if (value.length <= 11) {
+                    setNationalId(value);
+                  }
+                }}
+                placeholder="TC Kimlik Numarası"
+                className="form-input"
+                maxLength={11}
+              />
+            </div>
 
-      {/* Cinsiyet */}
-      <div className="form-group">
-        <label>Cinsiyet</label>
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="form-input"
-        >
-          <option value="Male">Erkek</option>
-          <option value="Female">Kadın</option>
-          <option value="Other">Diğer</option>
-        </select>
-      </div>
+            {/* Cinsiyet */}
+            <div className="form-group">
+              <label>Cinsiyet</label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="form-input"
+              >
+                <option value="Male">Erkek</option>
+                <option value="Female">Kadın</option>
+                <option value="Other">Diğer</option>
+              </select>
+            </div>
 
-      {/* Kayıt Ol Butonu */}
-      <button type="submit" className="register-button">
-        Kayıt Ol
-      </button>
-    </form>
+            {/* Kayıt Ol Butonu */}
+            <button type="submit" className="register-button">
+              Kayıt Ol
+            </button>
+          </form>
 
-    <div className="register-footer">
-      <p>
-        Zaten hesabınız var mı? <a href="/login" className="login-link">Giriş Yap</a>
-      </p>
-    </div>
-  </div>
-)}
-
+          <div className="register-footer">
+            <p>
+              Zaten hesabınız var mı?{" "}
+              <a href="/login" className="login-link">
+                Giriş Yap
+              </a>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

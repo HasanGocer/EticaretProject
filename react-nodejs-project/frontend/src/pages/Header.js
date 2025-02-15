@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import AuthService from "../Api's/auth.service";
 import { useCart } from "../context/CartContext";
 import axios from "axios";
-import "./Header.css";
 import {
   Box,
   Button,
@@ -23,7 +22,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-const Header = ({}) => {
+const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isAcountOpen, setIsAcountOpen] = useState(false);
@@ -32,8 +31,6 @@ const Header = ({}) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [showHeader, setShowHeader] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [bannerVisible, setBannerVisible] = useState(true); // Banner'ı kapatmak için state
 
   const logo = "/AdAstraYazLogo.png";
@@ -57,21 +54,6 @@ const Header = ({}) => {
     setIsAcountOpen((prev) => !prev);
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > lastScrollY && window.scrollY > 150) {
-        setShowHeader(false); // Aşağı kaydırınca gizle
-      } else {
-        setShowHeader(true); // Yukarı kaydırınca göster
-      }
-      setLastScrollY(window.scrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [lastScrollY]);
   useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
     if (currentUser) {
@@ -157,6 +139,18 @@ const Header = ({}) => {
 
   return (
     <>
+      <Box>
+        {" "}
+        <p className="banner-text">
+          550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
+        </p>
+        <button
+          onClick={() => setBannerVisible(false)}
+          className="banner-close-button"
+        >
+          X
+        </button>
+      </Box>
       {bannerVisible && (
         <HideOnScroll>
           <AppBar
@@ -171,132 +165,124 @@ const Header = ({}) => {
             }}
           >
             <Toolbar>
-              <p className="banner-text">
-                550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
-              </p>
-              <button
-                onClick={() => setBannerVisible(false)}
-                className="banner-close-button"
+              {" "}
+              <div className="logo" style={{ top: "0%", height: "100vh" }}>
+                <img
+                  src={logo}
+                  alt="Ad Astra Yazılım Logo"
+                  style={{
+                    filter: "invert(100%) grayscale(100%)",
+                    maxWidth: "300px",
+                    height: "auto",
+                  }}
+                />
+              </div>
+              <Box
+                sx={{
+                  padding: 3,
+                  minWidth: "600px",
+                  maxWidth: "600px",
+                  margin: "auto",
+                  position: "relative",
+                }}
               >
-                X
-              </button>
+                <Typography
+                  variant="h5"
+                  component="h1"
+                  gutterBottom
+                ></Typography>
+                <TextField
+                  fullWidth
+                  label="Ürün adı ara..."
+                  variant="outlined"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  sx={{ marginBottom: 3 }}
+                />
+                {searchTerm.trim() && (
+                  <Paper
+                    elevation={3}
+                    sx={{ padding: 2, position: "absolute", zIndex: "20000" }}
+                  >
+                    <List>
+                      {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                          <ListItem
+                            key={product.id}
+                            sx={{ display: "flex", alignItems: "center" }}
+                          >
+                            <img
+                              src={product.image_data}
+                              alt={product.name}
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                borderRadius: "5px",
+                                marginRight: "15px",
+                              }}
+                            />
+                            <ListItemText primary={product.name} />
+                          </ListItem>
+                        ))
+                      ) : (
+                        <Typography variant="body1" color="text.secondary">
+                          Eşleşen ürün bulunamadı.
+                        </Typography>
+                      )}
+                    </List>
+                  </Paper>
+                )}
+              </Box>
+              <Button
+                variant="contained"
+                onClick={toggleCart}
+                sx={{
+                  position: "absolute",
+                  top: "30%",
+                  right: "10px",
+                  height: "50px",
+                  width: "150px",
+                  background: "white",
+                  border: "1px solid #ccc",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#ffd54f" },
+                }}
+              >
+                <Badge badgeContent={cartItems.length} color="error">
+                  <ShoppingCartIcon
+                    sx={{ color: "#ff6f00", fontSize: "20px" }}
+                  />
+                </Badge>
+                <Typography
+                  sx={{ fontSize: "12px", fontWeight: "bold", color: "#333" }}
+                >
+                  {cartTotal()} TL
+                </Typography>
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleAcount()}
+                sx={{
+                  position: "absolute",
+                  top: "30%",
+                  right: "170px",
+                  height: "50px",
+                  width: "150px",
+                  background: "white",
+                  border: "1px solid #ccc",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: "#333",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#ffd54f" },
+                }}
+              >
+                {AuthService.getCurrentUser() ? "HESABIM" : "GİRİŞ/KAYIT"}
+              </Button>
             </Toolbar>
           </AppBar>
         </HideOnScroll>
       )}
-
-      {/* Ana Header */}
-      <Slide in={showHeader} direction="down">
-        <header className="fixedHeader">
-          <div className="logo" style={{ top: "0%", height: "100vh" }}>
-            <img
-              src={logo}
-              alt="Ad Astra Yazılım Logo"
-              style={{
-                filter: "invert(100%) grayscale(100%)",
-                maxWidth: "300px",
-                height: "auto",
-              }}
-            />
-          </div>
-          <Box
-            sx={{
-              padding: 3,
-              minWidth: "600px",
-              maxWidth: "600px",
-              margin: "auto",
-              position: "relative",
-            }}
-          >
-            <Typography variant="h5" component="h1" gutterBottom></Typography>
-            <TextField
-              fullWidth
-              label="Ürün adı ara..."
-              variant="outlined"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              sx={{ marginBottom: 3 }}
-            />
-            {searchTerm.trim() && (
-              <Paper
-                elevation={3}
-                sx={{ padding: 2, position: "absolute", zIndex: "20000" }}
-              >
-                <List>
-                  {filteredProducts.length > 0 ? (
-                    filteredProducts.map((product) => (
-                      <ListItem
-                        key={product.id}
-                        sx={{ display: "flex", alignItems: "center" }}
-                      >
-                        <img
-                          src={product.image_data}
-                          alt={product.name}
-                          style={{
-                            width: "50px",
-                            height: "50px",
-                            borderRadius: "5px",
-                            marginRight: "15px",
-                          }}
-                        />
-                        <ListItemText primary={product.name} />
-                      </ListItem>
-                    ))
-                  ) : (
-                    <Typography variant="body1" color="text.secondary">
-                      Eşleşen ürün bulunamadı.
-                    </Typography>
-                  )}
-                </List>
-              </Paper>
-            )}
-          </Box>
-          <Button
-            variant="contained"
-            onClick={toggleCart}
-            sx={{
-              position: "absolute",
-              top: "30%",
-              right: "10px",
-              height: "50px",
-              width: "150px",
-              background: "white",
-              border: "1px solid #ccc",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              "&:hover": { backgroundColor: "#ffd54f" },
-            }}
-          >
-            <Badge badgeContent={cartItems.length} color="error">
-              <ShoppingCartIcon sx={{ color: "#ff6f00", fontSize: "20px" }} />
-            </Badge>
-            <Typography
-              sx={{ fontSize: "12px", fontWeight: "bold", color: "#333" }}
-            >
-              {cartTotal()} TL
-            </Typography>
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => handleAcount()}
-            sx={{
-              position: "absolute",
-              top: "30%",
-              right: "170px",
-              height: "50px",
-              width: "150px",
-              background: "white",
-              border: "1px solid #ccc",
-              fontSize: "12px",
-              fontWeight: "bold",
-              color: "#333",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              "&:hover": { backgroundColor: "#ffd54f" },
-            }}
-          >
-            {AuthService.getCurrentUser() ? "HESABIM" : "GİRİŞ/KAYIT"}
-          </Button>
-        </header>
-      </Slide>
 
       <header
         className={`header ${

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AuthService from "../../services/auth.service";
+import AuthService from "../../Api's/auth.service";
 import { Link } from "react-router-dom";
 import "./EditUsers.css";
 
@@ -57,7 +57,7 @@ const EditUsers = () => {
 
   return (
     <div className="container">
-              <h1>Kullanıcı Yönetimi</h1>
+      <h1>Kullanıcı Yönetimi</h1>
       <Link to="/admin">
         <button className="button">Ana Sayfaya Dön</button>
       </Link>
@@ -92,7 +92,10 @@ const EditUsers = () => {
                 <td>{user.createdAt}</td>
                 <td>{user.updatedAt}</td>
                 <td>
-                  <button onClick={() => handleEditClick(user)} className="edit-button">
+                  <button
+                    onClick={() => handleEditClick(user)}
+                    className="edit-button"
+                  >
                     Düzenle
                   </button>
                 </td>
@@ -103,103 +106,105 @@ const EditUsers = () => {
       </div>
 
       {editingUser && (
-  <div className="modal">
-    <div className="modal-content">
-      <h3>Kullanıcıyı Düzenle</h3>
-      <div>
-        <label>Ad:</label>
-        <input
-          type="text"
-          name="firstName"
-          value={editingUser.firstName || ""}
-          onChange={handleInputChange}
-          placeholder="Ad"
-        />
-      </div>
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Kullanıcıyı Düzenle</h3>
+            <div>
+              <label>Ad:</label>
+              <input
+                type="text"
+                name="firstName"
+                value={editingUser.firstName || ""}
+                onChange={handleInputChange}
+                placeholder="Ad"
+              />
+            </div>
 
-      <div>
-        <label>Soyad:</label>
-        <input
-          type="text"
-          name="lastName"
-          value={editingUser.lastName || ""}
-          onChange={handleInputChange}
-          placeholder="Soyad"
-        />
-      </div>
+            <div>
+              <label>Soyad:</label>
+              <input
+                type="text"
+                name="lastName"
+                value={editingUser.lastName || ""}
+                onChange={handleInputChange}
+                placeholder="Soyad"
+              />
+            </div>
 
-      <div>
-        <label>Email:</label>
-        <input
-          type="email"
-          name="email"
-          value={editingUser.email || ""}
-          onChange={handleInputChange}
-          placeholder="E-posta"
-          readOnly
-        />
-      </div>
+            <div>
+              <label>Email:</label>
+              <input
+                type="email"
+                name="email"
+                value={editingUser.email || ""}
+                onChange={handleInputChange}
+                placeholder="E-posta"
+                readOnly
+              />
+            </div>
 
-      <div>
-        <label>Telefon:</label>
-        <input
-          type="text"
-          name="phone"
-          value={editingUser.phone || ""}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-            if (value.startsWith('5') && value.length <= 10) {
-              handleInputChange(e);  // Calls the handleInputChange for phone updates
-            }
-          }}
-          placeholder="Telefon Numarası"
-          maxLength={10}
-        />
-      </div>
+            <div>
+              <label>Telefon:</label>
+              <input
+                type="text"
+                name="phone"
+                value={editingUser.phone || ""}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // Only allow digits
+                  if (value.startsWith("5") && value.length <= 10) {
+                    handleInputChange(e); // Calls the handleInputChange for phone updates
+                  }
+                }}
+                placeholder="Telefon Numarası"
+                maxLength={10}
+              />
+            </div>
 
-      <div>
-        <label>TCKN:</label>
-        <input
-          type="text"
-          name="nationalId"
-          value={editingUser.nationalId || ""}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-            if (value.length <= 11) {
-              handleInputChange(e);  // Calls the handleInputChange for nationalId updates
-            }
-          }}
-          placeholder="T.C. Kimlik Numarası"
-          maxLength={11}
-        />
-      </div>
+            <div>
+              <label>TCKN:</label>
+              <input
+                type="text"
+                name="nationalId"
+                value={editingUser.nationalId || ""}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // Only allow digits
+                  if (value.length <= 11) {
+                    handleInputChange(e); // Calls the handleInputChange for nationalId updates
+                  }
+                }}
+                placeholder="T.C. Kimlik Numarası"
+                maxLength={11}
+              />
+            </div>
 
-      <div className="form-group">
-        <label>Cinsiyet:</label>
-        <select
-          name="gender"
-          value={editingUser.gender || ""}
-          onChange={handleInputChange}
-          className="form-input"
-        >
-          <option value="Male">Erkek</option>
-          <option value="Female">Kadın</option>
-          <option value="Other">Diğer</option>
-        </select>
-      </div>
+            <div className="form-group">
+              <label>Cinsiyet:</label>
+              <select
+                name="gender"
+                value={editingUser.gender || ""}
+                onChange={handleInputChange}
+                className="form-input"
+              >
+                <option value="Male">Erkek</option>
+                <option value="Female">Kadın</option>
+                <option value="Other">Diğer</option>
+              </select>
+            </div>
 
-      <div className="modal-actions">
-        <button onClick={handleSaveClick} className="button">
-          Kaydet
-        </button>
-        <button onClick={handleCancelEdit} className="button cancel-button">
-          İptal
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+            <div className="modal-actions">
+              <button onClick={handleSaveClick} className="button">
+                Kaydet
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="button cancel-button"
+              >
+                İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

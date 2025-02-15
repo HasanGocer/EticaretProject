@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AuthService from "../../services/auth.service";
+import AuthService from "../../Api's/auth.service";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 
@@ -19,7 +19,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!AuthService.getCurrentUser()) {
-      navigate('/login'); // Profil sayfasına yönlendir
+      navigate("/login"); // Profil sayfasına yönlendir
     }
     const currentUser = AuthService.getCurrentUser();
     if (currentUser) {
@@ -42,10 +42,10 @@ const Profile = () => {
     if (tckn.length !== 11 || isNaN(tckn)) {
       return false;
     }
-    if (tckn[0] === '0') {
+    if (tckn[0] === "0") {
       return false;
     }
-    const digits = tckn.split('').map(Number);
+    const digits = tckn.split("").map(Number);
     const sum1 = digits.slice(0, 10).reduce((acc, digit, index) => {
       if (index % 2 === 0) {
         return acc + digit;
@@ -80,121 +80,124 @@ const Profile = () => {
       .then(() => {
         setSuccessMessage("Profil başarıyla güncellendi!");
         window.location.reload();
-    })
+      })
       .catch((error) => {
-        const message = error.message || "Güncelleme sırasında bir hata oluştu.";
+        const message =
+          error.message || "Güncelleme sırasında bir hata oluştu.";
         setErrorMessage(message);
       });
   };
-  
 
   return (
     <div className="profile-container">
-     {AuthService.getCurrentUser() && (
-  <div className="profile-card">
-    <h1 className="profile-title">Profilinizi Düzenleyin</h1>
-    
-    {errorMessage && <p className="error-message">{errorMessage}</p>}
-    {successMessage && <p className="success-message">{successMessage}</p>}
-    
-    <form onSubmit={handleUpdate} className="profile-form">
-      {/* Ad */}
-      <div className="form-group">
-        <label>Ad</label>
-        <input
-          type="text"
-          value={user.firstName}
-          onChange={(e) => setUser({ ...user, firstName: e.target.value })}
-          placeholder="Ad"
-          className="form-input"
-        />
-      </div>
+      {AuthService.getCurrentUser() && (
+        <div className="profile-card">
+          <h1 className="profile-title">Profilinizi Düzenleyin</h1>
 
-      {/* Soyad */}
-      <div className="form-group">
-        <label>Soyad</label>
-        <input
-          type="text"
-          value={user.lastName}
-          onChange={(e) => setUser({ ...user, lastName: e.target.value })}
-          placeholder="Soyad"
-          className="form-input"
-        />
-      </div>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {successMessage && (
+            <p className="success-message">{successMessage}</p>
+          )}
 
-      {/* E-posta */}
-      <div className="form-group">
-        <label>E-posta</label>
-        <input
-          type="email"
-          value={user.email}
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
-          placeholder="E-posta"
-          className="form-input"
-          readOnly
-        />
-      </div>
+          <form onSubmit={handleUpdate} className="profile-form">
+            {/* Ad */}
+            <div className="form-group">
+              <label>Ad</label>
+              <input
+                type="text"
+                value={user.firstName}
+                onChange={(e) =>
+                  setUser({ ...user, firstName: e.target.value })
+                }
+                placeholder="Ad"
+                className="form-input"
+              />
+            </div>
 
-      {/* Telefon Numarası */}
-      <div className="form-group">
-        <label>Telefon Numarası (5xx xxx xxxx)</label>
-        <input
-          type="text"
-          value={user.phone}
-          onChange={(e) => {
-            // Sadece sayılar alınmalı ve 5 ile başlamalı
-            const value = e.target.value.replace(/\D/g, ''); // sadece rakamları al
-            if (value.startsWith('5') && value.length <= 10) {
-              setUser({ ...user, phone: value });
-            }
-          }}
-          placeholder="Telefon Numarası"
-          className="form-input"
-          maxLength={10}
-        />
-      </div>
+            {/* Soyad */}
+            <div className="form-group">
+              <label>Soyad</label>
+              <input
+                type="text"
+                value={user.lastName}
+                onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+                placeholder="Soyad"
+                className="form-input"
+              />
+            </div>
 
-      {/* TC Kimlik Numarası */}
-      <div className="form-group">
-        <label>TC Kimlik Numarası</label>
-        <input
-          type="text"
-          value={user.nationalId}
-          onChange={(e) => {
-            // Sadece sayılar alınmalı ve 5 ile başlamalı
-            const value = e.target.value.replace(/\D/g, ''); // sadece rakamları al
-            if ( value.length <= 11) {
-              setUser({ ...user, nationalId: value });
-            }
-          }}
-          placeholder="TC Kimlik Numarası"
-          className="form-input"
-          maxLength={11}
-        />
-      </div>
+            {/* E-posta */}
+            <div className="form-group">
+              <label>E-posta</label>
+              <input
+                type="email"
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
+                placeholder="E-posta"
+                className="form-input"
+                readOnly
+              />
+            </div>
 
-      {/* Cinsiyet */}
-      <div className="form-group">
-        <label>Cinsiyet</label>
-        <select
-          value={user.gender}
-          onChange={(e) => setUser({ ...user, gender: e.target.value })}
-          className="form-input"
-        >
-          <option value="Male">Erkek</option>
-          <option value="Female">Kadın</option>
-          <option value="Other">Diğer</option>
-        </select>
-      </div>
+            {/* Telefon Numarası */}
+            <div className="form-group">
+              <label>Telefon Numarası (5xx xxx xxxx)</label>
+              <input
+                type="text"
+                value={user.phone}
+                onChange={(e) => {
+                  // Sadece sayılar alınmalı ve 5 ile başlamalı
+                  const value = e.target.value.replace(/\D/g, ""); // sadece rakamları al
+                  if (value.startsWith("5") && value.length <= 10) {
+                    setUser({ ...user, phone: value });
+                  }
+                }}
+                placeholder="Telefon Numarası"
+                className="form-input"
+                maxLength={10}
+              />
+            </div>
 
-      {/* Güncelleme Butonu */}
-      <button type="submit" className="update-profile-button">
-        Güncelle
-      </button>
-    </form>
-  </div>
-)}
+            {/* TC Kimlik Numarası */}
+            <div className="form-group">
+              <label>TC Kimlik Numarası</label>
+              <input
+                type="text"
+                value={user.nationalId}
+                onChange={(e) => {
+                  // Sadece sayılar alınmalı ve 5 ile başlamalı
+                  const value = e.target.value.replace(/\D/g, ""); // sadece rakamları al
+                  if (value.length <= 11) {
+                    setUser({ ...user, nationalId: value });
+                  }
+                }}
+                placeholder="TC Kimlik Numarası"
+                className="form-input"
+                maxLength={11}
+              />
+            </div>
 
+            {/* Cinsiyet */}
+            <div className="form-group">
+              <label>Cinsiyet</label>
+              <select
+                value={user.gender}
+                onChange={(e) => setUser({ ...user, gender: e.target.value })}
+                className="form-input"
+              >
+                <option value="Male">Erkek</option>
+                <option value="Female">Kadın</option>
+                <option value="Other">Diğer</option>
+              </select>
+            </div>
+
+            {/* Güncelleme Butonu */}
+            <button type="submit" className="update-profile-button">
+              Güncelle
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
