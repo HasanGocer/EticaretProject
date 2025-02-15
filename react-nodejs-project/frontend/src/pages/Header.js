@@ -140,8 +140,8 @@ const Header = ({ bannerVisible, closeBanner }) => {
           <AppBar
             position="fixed"
             sx={{
-              minHeight: isMobile ? "10vh" : "20vh",
-              maxHeight: isMobile ? "10vh" : "20vh",
+              minHeight: "20vh",
+              maxHeight: "20vh",
               width: "100%",
               backgroundColor: "transparent",
               zIndex: 1100,
