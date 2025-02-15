@@ -7,6 +7,8 @@ import "./Header.css";
 import {
   Box,
   Button,
+  AppBar,
+  Toolbar,
   Typography,
   TextField,
   List,
@@ -135,12 +137,26 @@ const Header = ({ bannerVisible, closeBanner }) => {
     <>
       {bannerVisible && (
         <HideOnScroll>
-          <p className="banner-text">
-            550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
-          </p>
-          <button onClick={closeBanner} className="banner-close-button">
-            X
-          </button>
+          <AppBar
+            position="fixed"
+            sx={{
+              minHeight: isMobile ? "10vh" : "20vh",
+              maxHeight: isMobile ? "10vh" : "20vh",
+              width: "100%",
+              backgroundColor: "transparent",
+              zIndex: 1100,
+              boxShadow: "none",
+            }}
+          >
+            <Toolbar>
+              <p className="banner-text">
+                550 TL ÜZERİ ALIŞVERİŞLERİNİZİN KARGOSU ÜCRETSİZDİR.
+              </p>
+              <button onClick={closeBanner} className="banner-close-button">
+                X
+              </button>
+            </Toolbar>
+          </AppBar>
         </HideOnScroll>
       )}
       <header className="fixedHeader">
