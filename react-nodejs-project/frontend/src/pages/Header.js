@@ -23,7 +23,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-const Header = ({ bannerVisible, closeBanner }) => {
+const Header = ({}) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isAcountOpen, setIsAcountOpen] = useState(false);
