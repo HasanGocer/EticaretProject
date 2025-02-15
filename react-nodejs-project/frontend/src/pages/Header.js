@@ -193,13 +193,14 @@ const Header = () => {
       </AppBar>
 
       {/* İçerik */}
-      <Container
+      <AppBar
         position="fixed"
         sx={{
           marginTop: bannerVisible ? "100px" : "60px",
           backgroundColor: "#ff6f00",
           transition: "top 0.3s ease-in-out",
-          minHeight: "80vh",
+          maxHeight: "10vh",
+          weight: "100vh",
         }}
       >
         <Typography
@@ -208,10 +209,7 @@ const Header = () => {
         >
           Hoşgeldiniz
         </Typography>
-        <Typography variant="body1" sx={{ textAlign: "center" }}>
-          Mağazamızdaki en iyi ürünleri keşfedin!
-        </Typography>
-      </Container>
+      </AppBar>
 
       {/* Alt Çubuk */}
       <Box
