@@ -36,6 +36,9 @@ const Header = () => {
   const [bannerVisible, setBannerVisible] = useState(true);
   const [navHidden, setNavHidden] = useState(false);
 
+  const trigger = useScrollTrigger({ threshold: 150, disableHysteresis: true });
+  const prevTrigger = useRef(trigger);
+
   const logo = "/AdAstraYazLogo.png";
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
     useCart();
@@ -58,9 +61,17 @@ const Header = () => {
   const toggleAccountPanel = () => {
     setIsAcountOpen((prev) => !prev);
   };
+
   useEffect(() => {
     console.log("navHidden:", navHidden, "bannerVisible:", bannerVisible);
   }, [navHidden, bannerVisible]);
+
+  useEffect(() => {
+    if (prevTrigger.current !== trigger) {
+      onHide(trigger);
+      prevTrigger.current = trigger;
+    }
+  }, [trigger, onHide]);
 
   useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
@@ -203,7 +214,6 @@ const Header = () => {
       </HideOnScroll>
 
       <AppBar
-        key={`${navHidden}-${bannerVisible}`}
         position="fixed"
         sx={{
           top: navHidden
@@ -212,7 +222,7 @@ const Header = () => {
               : "0px"
             : bannerVisible
             ? "103px"
-            : "63px",
+            : "63px", // HideOnScroll kaybolunca yukarı çık
           backgroundColor: "#ff6f00",
           transition: "top 0.18s ease-in-out",
           maxHeight: "10vh",
