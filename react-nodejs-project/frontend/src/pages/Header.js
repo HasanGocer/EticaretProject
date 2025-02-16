@@ -43,11 +43,15 @@ const Header = () => {
   const { cartItems, updateCartItemQuantity, removeFromCart, cartTotal } =
     useCart();
 
-  function HideOnScroll(props) {
-    const { children, onHide } = props;
-    const trigger = useScrollTrigger({ threshold: 100 });
+  function HideOnScroll({ children, onHide }) {
+    const trigger = useScrollTrigger({
+      threshold: 150,
+      disableHysteresis: true,
+    });
+    const prevTrigger = useRef(trigger);
 
     useEffect(() => {
+      // Eğer önceki değerle aynıysa, gereksiz state güncellemesini engelle
       if (prevTrigger.current !== trigger) {
         onHide(trigger);
         prevTrigger.current = trigger;
