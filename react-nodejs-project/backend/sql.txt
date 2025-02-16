@@ -108,5 +108,6 @@ GIT_SSH_COMMAND='ssh -i /root/.ssh/id_ed25519' git push origin main
 
 sudo systemctl restart mariadb
 sudo systemctl restart httpd
+sudo systemctl restart nginx
 pm2 restart shopserver
 sudo reboot

@@ -4,7 +4,7 @@ import mysql from "mysql2";
 const db = mysql.createConnection({
   host: "localhost", // veya kullanılan veritabanı sunucusu
   user: "shopAdminDB",
-  password: "9tn9&E98w", // veritabanı şifrenizi buraya yazın
+  password: "#tY050fs3", // veritabanı şifrenizi buraya yazın
   database: "admin_shopEvipy", // veritabanı ismini buraya yazın
 });
 

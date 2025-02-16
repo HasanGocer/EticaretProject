@@ -8,7 +8,7 @@ dotenv.config();
 const db = mysql.createPool({
   host: "localhost",
   user: "shopAdminDB",
-  password: "9tn9&E98w",
+  password: "#tY050fs3",
   database: "admin_shopEvipy",
   port: 3306,
 });
