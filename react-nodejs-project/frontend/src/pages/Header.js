@@ -58,6 +58,9 @@ const Header = () => {
   const toggleAccountPanel = () => {
     setIsAcountOpen((prev) => !prev);
   };
+  useEffect(() => {
+    console.log("navHidden:", navHidden, "bannerVisible:", bannerVisible);
+  }, [navHidden, bannerVisible]);
 
   useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
@@ -200,6 +203,7 @@ const Header = () => {
       </HideOnScroll>
 
       <AppBar
+        key={`${navHidden}-${bannerVisible}`}
         position="fixed"
         sx={{
           top: navHidden
@@ -208,7 +212,7 @@ const Header = () => {
               : "0px"
             : bannerVisible
             ? "103px"
-            : "63px", // HideOnScroll kaybolunca yukarı çık
+            : "63px",
           backgroundColor: "#ff6f00",
           transition: "top 0.18s ease-in-out",
           maxHeight: "10vh",
