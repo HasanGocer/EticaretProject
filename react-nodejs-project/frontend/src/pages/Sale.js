@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Box, Hidden } from "@mui/material";
 import ProductCard from "../components/ProductCard";
+import { GetAllProducts } from "../Api's/api";
 import "./Sale.css";
 
 const Sale = () => {
@@ -13,7 +14,7 @@ const Sale = () => {
   // API'den ürün çekme
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-products");
+      const response = await GetAllProducts();
       const fetchedProducts = response.data;
       console.log(fetchedProducts);
       if (fetchedProducts.length < 20) {

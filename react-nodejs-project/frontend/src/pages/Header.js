@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../Api's/auth.service";
 import { useCart } from "../context/CartContext";
+import { GetAllProducts } from "../Api's/api";
 import axios from "axios";
 import {
   Box,
@@ -48,10 +49,9 @@ const Header = () => {
       threshold: 150,
       disableHysteresis: true,
     });
-    const prevTrigger = useRef(trigger);
+    const prevTrigger = useRef(null);
 
     useEffect(() => {
-      // Eğer önceki değerle aynıysa, gereksiz state güncellemesini engelle
       if (prevTrigger.current !== trigger) {
         onHide(trigger);
         prevTrigger.current = trigger;
@@ -64,6 +64,7 @@ const Header = () => {
       </Slide>
     );
   }
+
   const toggleCart = () => setIsOpen(!isOpen);
   const toggleAccountPanel = () => {
     setIsAcountOpen((prev) => !prev);
@@ -78,15 +79,11 @@ const Header = () => {
     if (currentUser) {
       setUser(currentUser);
     }
-    fetchProducts();
+    FetchProducts();
   }, []);
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/get-products");
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Ürünler alınamadı:", error);
-    }
+  const FetchProducts = async () => {
+    const products = await GetAllProducts();
+    setProducts(products.data);
   };
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -157,7 +154,7 @@ const Header = () => {
   };
 
   return (
-    <>
+    <Container>
       {bannerVisible && (
         <Box
           sx={{
@@ -495,7 +492,7 @@ const Header = () => {
           </Paper>
         )}
       </Box>
-    </>
+    </Container>
   );
 };
 
