@@ -83,7 +83,7 @@ const Header = () => {
   }, []);
   const FetchProducts = async () => {
     const products = await GetAllProducts();
-    setProducts(products.data);
+    setProducts(products);
   };
   const handleSearchChange = (e) => {
     const value = e.target.value;

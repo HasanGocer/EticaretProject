@@ -15,7 +15,7 @@ const Sale = () => {
   const fetchProducts = async () => {
     try {
       const response = await GetAllProducts();
-      const fetchedProducts = response.data;
+      const fetchedProducts = response;
       console.log(fetchedProducts);
       if (fetchedProducts.length < 20) {
         const remainingProducts = [...fetchedProducts];
