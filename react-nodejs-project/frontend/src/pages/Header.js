@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../Api's/auth.service";
 import { useCart } from "../context/CartContext";
@@ -48,7 +48,10 @@ const Header = () => {
     const trigger = useScrollTrigger({ threshold: 100 });
 
     useEffect(() => {
-      onHide(trigger);
+      if (prevTrigger.current !== trigger) {
+        onHide(trigger);
+        prevTrigger.current = trigger;
+      }
     }, [trigger, onHide]);
 
     return (
@@ -65,13 +68,6 @@ const Header = () => {
   useEffect(() => {
     console.log("navHidden:", navHidden, "bannerVisible:", bannerVisible);
   }, [navHidden, bannerVisible]);
-
-  useEffect(() => {
-    if (prevTrigger.current !== trigger) {
-      onHide(trigger);
-      prevTrigger.current = trigger;
-    }
-  }, [trigger, onHide]);
 
   useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
