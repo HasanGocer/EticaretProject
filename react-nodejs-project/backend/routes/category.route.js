@@ -1,6 +1,8 @@
-const express = require("express");
+// ES Module format
+import express from "express";
+import db from "../db"; // Veritabanı bağlantısı dosyanızın yolu
+
 const router = express.Router();
-const db = require("../db"); // Veritabanı bağlantısı dosyanızın yolu
 
 router.post("/add", (req, res) => {
   const { name } = req.body;
@@ -15,6 +17,7 @@ router.post("/add", (req, res) => {
     });
   });
 });
+
 router.get("/get", (req, res) => {
   const query = "SELECT * FROM categorys";
   db.query(query, (err, results) => {
@@ -26,6 +29,7 @@ router.get("/get", (req, res) => {
     res.status(200).json(results);
   });
 });
+
 router.put("/update/:id", (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
@@ -48,6 +52,7 @@ router.put("/update/:id", (req, res) => {
     }
   });
 });
+
 router.delete("/delete/:id", (req, res) => {
   const { id } = req.params;
 
@@ -78,4 +83,4 @@ router.delete("/delete/:id", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;
