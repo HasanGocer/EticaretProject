@@ -1,6 +1,6 @@
 // ES Module format
 import express from "express";
-import db from "../db"; // Veritabanı bağlantısı dosyanızın yolu
+import db from "../db.js"; // Veritabanı bağlantısı dosyanızın yolu
 
 const router = express.Router();
 
