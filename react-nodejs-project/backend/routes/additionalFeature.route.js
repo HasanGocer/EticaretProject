@@ -58,42 +58,27 @@ router.put("/update/:id", async (req, res) => {
 });
 router.delete("/delete/:id", async (req, res) => {
   const { id } = req.params;
-
-  const connection = await db.getConnection();
   try {
-    await connection.beginTransaction();
-
-    // Önce ilişkili verileri sil
-    await connection.query(
+    await db.query(
+      "DELETE FROM product_additionalfeatures_details WHERE product_additionalfeatures IN (SELECT id FROM product_additionalfeatures WHERE additionalfeature_id = ?)",
+      [id]
+    );
+    await db.query(
       "DELETE FROM product_additionalfeatures WHERE additionalfeature_id = ?",
       [id]
     );
-    await connection.query(
-      "DELETE FROM product_additionalfeatures_details WHERE additionalfeature_id = ?",
-      [id]
-    );
-
-    // Ana tabloyu sil
-    const [result] = await connection.query(
+    const [result] = await db.query(
       "DELETE FROM additionalfeatures WHERE id = ?",
       [id]
     );
-
-    if (result.affectedRows > 0) {
-      await connection.commit();
-      res.json({ message: "Özellik ve ilişkili veriler başarıyla silindi." });
-    } else {
-      await connection.rollback();
-      res.status(404).json({ message: "Özellik bulunamadı." });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Özellik bulunamadı." });
     }
-  } catch (err) {
-    await connection.rollback();
-    console.error("Özellik silme hatası:", err);
+    res.json({ message: "Özellik ve ilişkili veriler başarıyla silindi." });
+  } catch (error) {
     res
       .status(500)
-      .json({ message: "Özellik silinemedi.", error: err.message });
-  } finally {
-    connection.release();
+      .json({ error: "Veritabanı hatası", details: error.message });
   }
 });
 

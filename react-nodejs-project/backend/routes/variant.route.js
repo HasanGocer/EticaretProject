@@ -61,46 +61,23 @@ router.put("/update/:id", async (req, res) => {
     res.status(500).json({ message: "Bir hata oluştu.", error: error.message });
   }
 });
-router.delete("/delete/:id", async (req, res) => {
+router.delete("delete/:id", async (req, res) => {
   const { id } = req.params;
-
-  const connection = await db.getConnection();
   try {
-    await connection.beginTransaction();
-
-    // Önce ilişkili verileri sil
-    await connection.query(
-      "DELETE FROM product_variants WHERE variant_id = ?",
+    await db.query(
+      "DELETE FROM product_variant_details WHERE product_variants IN (SELECT id FROM product_variants WHERE variant_id = ?)",
       [id]
     );
-    await connection.query(
-      "DELETE FROM product_variant_details WHERE variant_id = ?",
-      [id]
-    );
-
-    // Ana tabloyu sil
-    const [result] = await connection.query(
-      "DELETE FROM variants WHERE id = ?",
-      [id]
-    );
-
-    if (result.affectedRows > 0) {
-      await connection.commit();
-      res
-        .status(200)
-        .json({ message: "Varyant ve ilişkili veriler başarıyla silindi." });
-    } else {
-      await connection.rollback();
-      res.status(404).json({ message: "Varyant bulunamadı!" });
+    await db.query("DELETE FROM product_variants WHERE variant_id = ?", [id]);
+    const [result] = await db.query("DELETE FROM variants WHERE id = ?", [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Varyant bulunamadı." });
     }
+    res.json({ message: "Varyant ve ilişkili veriler başarıyla silindi." });
   } catch (error) {
-    await connection.rollback();
-    console.error("Varyant silme hatası:", error);
     res
       .status(500)
-      .json({ message: "Varyant silinemedi.", error: error.message });
-  } finally {
-    connection.release();
+      .json({ error: "Veritabanı hatası", details: error.message });
   }
 });
 
