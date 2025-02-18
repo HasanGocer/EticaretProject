@@ -244,7 +244,7 @@ export const addTrademarkHG = async (trademark, image_data) => {
       console.log(pair[0], pair[1]); // Name ve image_data doğru mu?
     }
 
-    const response = await axios.post(`${API_URL}/trademark/add-hg`, formData, {
+    const response = await axios.post(`${API_URL}/trademark/add`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
