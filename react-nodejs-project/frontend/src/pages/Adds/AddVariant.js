@@ -39,6 +39,7 @@ function AddVariant() {
   const fetchVariants = async () => {
     try {
       const variantsData = await getVariants();
+      console.log(variantsData);
       setVariants(variantsData);
     } catch (error) {
       console.error("Varyantları alırken bir hata oluştu.", error);

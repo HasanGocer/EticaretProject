@@ -37,7 +37,6 @@ function AddAdditionalFeature() {
   const fetchAdditionalFeatures = async () => {
     try {
       const additionalFeatures = await getAdditionalFeatures();
-      console.log(additionalFeatures);
       setAdditionalFeatures(additionalFeatures);
     } catch (error) {
       setMessage("Bir hata oluştu.", error);
