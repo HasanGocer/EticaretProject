@@ -39,7 +39,6 @@ function AddVariant() {
   const fetchVariants = async () => {
     try {
       const variantsData = await getVariants();
-      console.log(variantsData);
       setVariants(variantsData);
     } catch (error) {
       console.error("Varyantları alırken bir hata oluştu.", error);
@@ -136,7 +135,7 @@ function AddVariant() {
               >
                 <Typography>{variant.name}</Typography>
                 <IconButton
-                  onClick={() => handleDelete(variant.ID)}
+                  onClick={() => handleDelete(variant.id)}
                   color="error"
                   sx={{ padding: "8px" }}
                 >
