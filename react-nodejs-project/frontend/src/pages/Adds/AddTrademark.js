@@ -37,7 +37,7 @@ function AddTrademark() {
 
       fetchTrademarks();
     } catch (error) {
-      setMessage("Bir hata oluştu.");
+      setMessage("Bir hata oluştu.", error);
     }
   };
   const fetchTrademarks = async () => {
