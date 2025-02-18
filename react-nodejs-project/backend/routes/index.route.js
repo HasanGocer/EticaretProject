@@ -21,7 +21,7 @@ router.use("/additionalFeature", additionalFeatureRoutes);
 router.use("/variant", variantRoutes);
 router.use("/category", categoryRoutes);
 router.use("/subcategory", subcategoryRoutes);
-router.use("/trademarkHG", trademarkRoutes);
+router.use("/trademark", trademarkRoutes);
 router.use("/product", productRoutes);
 router.use("/product_additionalfeatures", product_additionalfeaturesRoutes);
 router.use("/product_variants", product_variantsRoutes);

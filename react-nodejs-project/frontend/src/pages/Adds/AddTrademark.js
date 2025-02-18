@@ -27,6 +27,8 @@ function AddTrademark() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log(trademark);
+      console.log(image);
       const responseData = await addTrademarkHG(trademark, image);
       setMessage(responseData.message);
 
