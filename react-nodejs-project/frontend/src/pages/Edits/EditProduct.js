@@ -39,7 +39,7 @@ import {
   getTrademarkName,
   getAdditionalFeatureNames,
   getSubcategoryName,
-} from ".../components/ProductComps";
+} from "../../components/ProductComps";
 
 function EditProduct() {
   //#region fields
