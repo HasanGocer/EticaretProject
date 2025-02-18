@@ -1,3 +1,5 @@
+import { Typography } from "@mui/material";
+
 export const calculateDiscountedPrice = (price, discountRate) => {
   return price - (price * discountRate) / 100;
 };

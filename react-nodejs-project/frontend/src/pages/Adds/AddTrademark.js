@@ -21,7 +21,7 @@ function AddTrademark() {
   const [trademark, setTrademark] = useState("");
   const [message, setMessage] = useState("");
   const [trademarks, setTrademarks] = useState([]);
-  const [image, setimage] = useState(null);
+  const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // Yeni trademark ekleme
@@ -62,7 +62,7 @@ function AddTrademark() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setimage(file);
+    setImage(file);
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {

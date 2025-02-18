@@ -39,6 +39,7 @@ import {
   getTrademarkName,
   getAdditionalFeatureNames,
   getSubcategoryName,
+  getVariantNames,
 } from "../../components/ProductComps";
 
 function EditProduct() {
