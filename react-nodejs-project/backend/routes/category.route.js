@@ -20,17 +20,14 @@ router.post("/add", async (req, res) => {
     res.status(500).json({ message: "Sunucu hatası" });
   }
 });
-
-router.get("/get", (req, res) => {
-  const query = "SELECT * FROM categorys";
-  db.query(query, (err, results) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ message: "Kategoriler alınamadı.", error: err.message });
-    }
+router.get("/get", async (req, res) => {
+  try {
+    const [results] = await db.query("SELECT * FROM categorys");
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error("Kategori alma hatası:", err);
+    res.status(500).json({ message: "Kategori alınamadı." });
+  }
 });
 router.put("/update/:id", (req, res) => {
   const { id } = req.params;
@@ -57,7 +54,6 @@ router.put("/update/:id", (req, res) => {
 router.delete("/delete/:id", (req, res) => {
   const { id } = req.params;
 
-  // Alt kategorileri sil
   const deleteSubcategoriesQuery =
     "DELETE FROM subcategorys WHERE category_id = ?";
   db.query(deleteSubcategoriesQuery, [id], (err, result) => {
@@ -68,7 +64,6 @@ router.delete("/delete/:id", (req, res) => {
       });
     }
 
-    // Üst kategoriyi sil
     const deleteCategoryQuery = "DELETE FROM categorys WHERE id = ?";
     db.query(deleteCategoryQuery, [id], (err, result) => {
       if (err) {

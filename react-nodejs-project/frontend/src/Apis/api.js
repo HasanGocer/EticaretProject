@@ -292,10 +292,10 @@ export const getVariants = async () => {
     throw error.response?.data || "Varyantları alırken bir hata oluştu.";
   }
 };
-export const addVariant = async (variant) => {
+export const addVariant = async (name) => {
   try {
     const response = await axios.post(`${API_URL}/variant/add`, {
-      variant,
+      name,
     });
     return response.data;
   } catch (error) {
