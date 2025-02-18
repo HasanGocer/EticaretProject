@@ -228,7 +228,7 @@ export const deleteSubcategory = async (id) => {
 //#region trademark
 export const getTrademarks = async () => {
   try {
-    const response = await axios.get(`${API_URL}/trademark/get`);
+    const response = await axios.get(`${API_URL}/trademarkHG/get`);
     return response.data;
   } catch (error) {
     throw error.response?.data || "Trademarkları alırken bir hata oluştu.";
@@ -240,9 +240,13 @@ export const addTrademarkHG = async (trademark, image_data) => {
     formData.append("name", trademark);
     formData.append("image_data", image_data);
 
-    const response = await axios.post(`${API_URL}/trademark/addHG`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await axios.post(
+      `${API_URL}/trademarkHG/addHG`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data || "Trademark eklenirken bir hata oluştu.";
@@ -258,7 +262,7 @@ export const updateTrademarkHG = async (id, name, imageFile = null) => {
     }
 
     const response = await axios.put(
-      `${API_URL}/trademark/update/${id}`,
+      `${API_URL}/trademarkHG/update/${id}`,
       formData,
       {
         headers: {
@@ -274,7 +278,7 @@ export const updateTrademarkHG = async (id, name, imageFile = null) => {
 };
 export const deleteTrademark = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/trademark/delete/${id}`);
+    const response = await axios.delete(`${API_URL}/trademarkHG/delete/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || "Trademark silinirken bir hata oluştu.";
