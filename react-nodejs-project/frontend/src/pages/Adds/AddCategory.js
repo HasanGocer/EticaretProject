@@ -90,7 +90,10 @@ function AddCategory() {
   const handleSubcategorySubmit = async (e) => {
     e.preventDefault();
     try {
-      const responseData = await addSubcategory(selectedCategory, subcategory);
+      const responseData = await addSubcategory(
+        selectedCategory.id,
+        subcategory
+      );
       setMessage(responseData.message);
       fetchSubcategories();
     } catch (error) {
