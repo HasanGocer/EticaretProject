@@ -15,76 +15,60 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { getTrademarks, deleteTrademark, addTrademarkHG } from ".../Api's/api";
 
 function AddTrademark() {
   const [trademark, setTrademark] = useState("");
   const [message, setMessage] = useState("");
   const [trademarks, setTrademarks] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
+  const [image, setimage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // Yeni trademark ekleme
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Resmi base64 olarak encode edip gönderiyoruz
-      const formData = new FormData();
-      formData.append("trademark", trademark);
-      formData.append("image", imageFile);
+      const responseData = await addTrademarkHG(trademark, image);
+      setMessage(responseData.message);
 
-      const response = await axios.post(
-        "http://localhost:5000/add-trademark",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setMessage(response.data.message);
-      setTrademark(""); // Formu sıfırlama
-      setImageFile(null); // Formu sıfırlama
-      setPreviewUrl(null); // Formu sıfırlama
+      // Formu sıfırlama
+      setTrademark("");
+      setImage(null);
+      setPreviewUrl(null);
+
       fetchTrademarks();
     } catch (error) {
       setMessage("Bir hata oluştu.");
     }
   };
-
-  // Trademark listesini çek
   const fetchTrademarks = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-trademarks");
-      setTrademarks(response.data);
-      console.log(response.data);
+      const trademarksData = await getTrademarks();
+      setTrademarks(trademarksData);
     } catch (error) {
       console.error("Trademarkları alırken bir hata oluştu.", error);
     }
   };
 
-  // Resim dosyasını önizlemek için
+  const handleDelete = async (id) => {
+    try {
+      const responseData = await deleteTrademark(id);
+      setMessage(responseData.message);
+      fetchTrademarks();
+    } catch (error) {
+      setMessage("Silme işlemi başarısız.");
+    }
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImageFile(file);
+    setimage(file);
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  // Trademark silme işlemi
-  const handleDelete = async (id) => {
-    try {
-      const response = await axios.delete(
-        `http://localhost:5000/delete-trademark/${id}`
-      );
-      setMessage(response.data.message);
-      fetchTrademarks();
-    } catch (error) {
-      setMessage("Silme işlemi başarısız.");
     }
   };
 
@@ -177,14 +161,14 @@ function AddTrademark() {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <img
                     src={trademark.image_data}
-                    alt={trademark.UrunAdi}
+                    alt={trademark.name}
                     style={{
                       width: "50px",
                       height: "50px",
                       objectFit: "cover",
                     }}
                   />
-                  <Typography>{trademark.UrunAdi}</Typography>
+                  <Typography>{trademark.name}</Typography>
                 </Box>
                 <IconButton
                   onClick={() => handleDelete(trademark.ID)}

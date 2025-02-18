@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { getVariants, deleteVariant, addVariant } from ".../Api's/api";
 
 // AddVariant Bileşeni
 function AddVariant() {
@@ -26,12 +27,10 @@ function AddVariant() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/add-variant", {
-        variant,
-      });
-      setMessage(response.data.message);
+      const responseData = await addVariant(variant);
+      setMessage(responseData.message);
       fetchVariants();
-      setVariant("");
+      setVariant(""); // Formu sıfırlama
     } catch (error) {
       setMessage("Bir hata oluştu.");
     }
@@ -39,8 +38,8 @@ function AddVariant() {
 
   const fetchVariants = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-variants");
-      setVariants(response.data);
+      const variantsData = await getVariants();
+      setVariants(variantsData);
     } catch (error) {
       console.error("Varyantları alırken bir hata oluştu.", error);
     }
@@ -48,10 +47,8 @@ function AddVariant() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:5000/delete-variant/${id}`
-      );
-      setMessage(response.data.message);
+      const responseData = await deleteVariant(id);
+      setMessage(responseData.message);
       fetchVariants();
     } catch (error) {
       setMessage("Varyant silinemedi.");
@@ -136,7 +133,7 @@ function AddVariant() {
                   borderRadius: "5px",
                 }}
               >
-                <Typography>{variant.UrunAdi}</Typography>
+                <Typography>{variant.name}</Typography>
                 <IconButton
                   onClick={() => handleDelete(variant.ID)}
                   color="error"

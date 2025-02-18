@@ -10,71 +10,54 @@ import {
   ListItemText,
   Modal,
 } from "@mui/material";
-import axios from "axios";
-
+import {
+  getCategories,
+  getSubcategories,
+  updateCategoryHG,
+  updateSubcategoryHG,
+} from ".../Api's/api";
 function EditCategory() {
   const [message, setMessage] = useState("");
   const [categories, setCategories] = useState([]);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [subcategories, setSubcategories] = useState([]);
   const [editingSubcategories, setEditingSubcategories] = useState({});
 
-  // Kategorileri çek
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-categorys");
-      setCategories(response.data);
+      const categories = await getCategories();
+      setCategories(categories);
     } catch (error) {
       console.error("Kategoriler çekilirken hata oluştu.", error);
     }
   };
-
-  // Alt kategorileri çek ve düzenleme alanlarını başlat
   const fetchSubcategories = async (categoryId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/get-subcategorys?category_id=${categoryId}`
-      );
-      setSubcategories(response.data);
-
-      const initialEditingSubcategories = {};
-      response.data.forEach((sub) => {
-        initialEditingSubcategories[sub.id] = { name: sub.name };
-      });
-      setEditingSubcategories(initialEditingSubcategories);
+      const subcategories = await getSubcategories(categoryId);
+      setEditingSubcategories(subcategories);
     } catch (error) {
       console.error("Alt kategoriler çekilirken hata oluştu.", error);
     }
   };
-
-  // Alt kategori güncelle
   const updateSubcategory = async (id) => {
     try {
-      console.log(
-        "Updating subcategory with id:",
+      const responseData = await updateSubcategoryHG(
         id,
-        "name:",
         editingSubcategories[id]?.name
       );
 
-      const response = await axios.put(
-        `http://localhost:5000/update-subcategory/${id}`,
-        { name: editingSubcategories[id]?.name }
-      );
-      setMessage(response.data.message);
-      fetchSubcategories(editingCategory.ID);
+      setMessage(responseData.message);
+      fetchSubcategories(editingCategory.id);
     } catch (error) {
       console.error("Alt kategori güncellenirken hata oluştu.", error);
     }
   };
-
   const updateCategory = async () => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/update-category/${editingCategory.ID}`,
-        { UrunAdi: editingCategory.UrunAdi }
-      );
-      setMessage(response.data.message || "Kategori başarıyla güncellendi.");
+      const responseData = await updateCategoryHG(editingCategory.ID, {
+        name: editingCategory.name,
+      });
+
+      setMessage(responseData.message || "Kategori başarıyla güncellendi.");
       closeEditCategoryModal();
       fetchCategories();
     } catch (error) {
@@ -86,14 +69,15 @@ function EditCategory() {
   const closeEditCategoryModal = () => {
     setEditingCategory(null);
   };
-
   const handleSubcategoryChange = (id, value) => {
     setEditingSubcategories((prev) => ({
       ...prev,
       [id]: { ...prev[id], name: value },
     }));
   };
-
+  useEffect(() => {
+    fetchCategories();
+  }, []);
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -122,15 +106,15 @@ function EditCategory() {
       <Typography variant="h5">Kategori Listesi</Typography>
       <List className="category-list">
         {categories.map((category) => (
-          <ListItem key={category.ID} className="category-item">
-            <ListItemText primary={category.UrunAdi} />
+          <ListItem key={category.id} className="category-item">
+            <ListItemText primary={category.name} />
             <Button
               variant="contained"
               color="primary"
               className="edit-button"
               onClick={() => {
                 setEditingCategory({ ...category });
-                fetchSubcategories(category.ID);
+                fetchSubcategories(category.id);
               }}
             >
               Düzenle
@@ -148,11 +132,11 @@ function EditCategory() {
               fullWidth
               variant="outlined"
               margin="normal"
-              value={editingCategory.UrunAdi}
+              value={editingCategory.name}
               onChange={(e) =>
                 setEditingCategory({
                   ...editingCategory,
-                  UrunAdi: e.target.value,
+                  name: e.target.value,
                 })
               }
               className="input-field"
@@ -179,29 +163,27 @@ function EditCategory() {
               Alt Kategoriler
             </Typography>
             <List className="subcategory-list">
-              {subcategories
-                .filter((sub) => sub.category_id === editingCategory.ID)
-                .map((sub) => (
-                  <ListItem key={sub.id} className="subcategory-item">
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      value={editingSubcategories[sub.id]?.name || sub.name}
-                      onChange={(e) =>
-                        handleSubcategoryChange(sub.id, e.target.value)
-                      }
-                      className="input-field"
-                    />
-                    <Button
-                      variant="contained"
-                      color="success"
-                      className="button"
-                      onClick={() => updateSubcategory(sub.id)}
-                    >
-                      Kaydet
-                    </Button>
-                  </ListItem>
-                ))}
+              {editingSubcategories.map((sub) => (
+                <ListItem key={sub.id} className="subcategory-item">
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    value={sub.name}
+                    onChange={(e) =>
+                      handleSubcategoryChange(sub.id, e.target.value)
+                    }
+                    className="input-field"
+                  />
+                  <Button
+                    variant="contained"
+                    color="success"
+                    className="button"
+                    onClick={() => updateSubcategory(sub.id)}
+                  >
+                    Kaydet
+                  </Button>
+                </ListItem>
+              ))}
             </List>
           </Box>
         </Modal>

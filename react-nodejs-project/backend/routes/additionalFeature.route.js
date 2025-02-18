@@ -4,8 +4,6 @@ import { db } from "../db.js";
 const router = express.Router();
 
 router.post("/add", async (req, res) => {
-  console.log("Backend'e gelen JSON:", req.body);
-
   const { name } = req.body;
   if (!name) {
     return res.status(400).json({ message: "Gönderilen veri eksik!" });

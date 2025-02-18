@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Box,
   Button,
@@ -13,6 +12,11 @@ import {
   Paper,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  addAdditionalFeature,
+  getAdditionalFeatures,
+  deleteAdditionalFeature,
+} from ".../Api's/api";
 
 function AddAdditionalFeature() {
   const [additionalfeature, setAdditionalfeature] = useState("");
@@ -22,39 +26,30 @@ function AddAdditionalFeature() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:5000/add-additionalFeature", // Doğru URL
-        { additionalFeature: additionalfeature } // Gönderilen veri yapısı burada JSON objesi gibi olmalı
-      );
-      console.log(response.data);
-      setMessage(response.data.message);
+      const responseData = await addAdditionalFeature(additionalfeature);
+      setMessage(responseData.message);
       fetchAdditionalFeatures();
     } catch (error) {
-      console.error("Backend'den dönen hata: ", error.response?.data);
-      setMessage("Bir hata oluştu.");
+      setMessage("Bir hata oluştu.", error);
     }
   };
 
   const fetchAdditionalFeatures = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/get-additionalfeatures"
-      );
-      setAdditionalFeatures(response.data);
+      const additionalFeatures = await getAdditionalFeatures();
+      setAdditionalFeatures(additionalFeatures);
     } catch (error) {
-      console.error("Bir hata oluştu:", error);
+      setMessage("Bir hata oluştu.", error);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:5000/delete-additionalfeature/${id}`
-      );
-      setMessage(response.data.message);
+      const responseData = await deleteAdditionalFeature(id);
+      setMessage(responseData.message);
       fetchAdditionalFeatures();
     } catch (error) {
-      setMessage("Silme işlemi başarısız.");
+      setMessage("Bir hata oluştu.", error);
     }
   };
 
@@ -117,7 +112,7 @@ function AddAdditionalFeature() {
               </IconButton>
             }
           >
-            <ListItemText primary={feature.UrunAdi} />
+            <ListItemText primary={feature.name} />
           </ListItem>
         ))}
       </List>

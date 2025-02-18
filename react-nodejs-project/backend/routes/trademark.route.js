@@ -29,21 +29,26 @@ const upload = multer({ storage });
 
 router.post("/add", upload.single("image"), async (req, res) => {
   try {
-    const { name } = req.body;
+    const { trademark } = req.body;
+
     if (!req.file) {
       return res.status(400).json({ message: "Resim dosyası gereklidir." });
     }
 
+    if (!trademark) {
+      return res.status(400).json({ message: "Trademark adı gereklidir." });
+    }
+
     const imageUrl = `/uploads/${req.file.filename}`;
-    const sql = "INSERT INTO trademarks (name, image_data) VALUES (?, ?)";
-    const [result] = await db.query(sql, [name, imageUrl]);
+    const sql = "INSERT INTO trademarks (name, image) VALUES (?, ?)";
+    const [result] = await db.query(sql, [trademark, imageUrl]);
 
     res.status(201).json({
       message: "Trademark başarıyla kaydedildi!",
       object: {
         id: result.insertId,
-        name,
-        image_data: imageUrl,
+        name: trademark,
+        image: imageUrl,
         created_at: new Date(),
       },
     });

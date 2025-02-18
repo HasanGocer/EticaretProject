@@ -14,8 +14,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import axios from "axios";
-
+import { getTrademarks, updateTrademarkHG } from ".../Api's/api";
 function EditTrademark() {
   const [message, setMessage] = useState("");
   const [trademarks, setTrademarks] = useState([]);
@@ -24,8 +23,8 @@ function EditTrademark() {
   // Trademarkları çekme
   const fetchTrademarks = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-trademarks");
-      setTrademarks(response.data);
+      const trademarksData = await getTrademarks();
+      setTrademarks(trademarksData);
     } catch (error) {
       console.error("Trademarkları alırken bir hata oluştu.", error);
     }
@@ -34,15 +33,15 @@ function EditTrademark() {
   // Trademark güncelleme
   const updateTrademark = async () => {
     try {
-      console.log(editingTrademark.ID);
-      const response = await axios.put(
-        `http://localhost:5000/update-trademark/${editingTrademark.ID}`,
-        { UrunAdi: editingTrademark.UrunAdi }
-      );
-      setMessage(response.data.message);
+      const responseData = await updateTrademarkHG(editingTrademark.ID, {
+        name: editingTrademark.name,
+      });
+
+      setMessage(responseData.message);
     } catch (error) {
       console.error("Trademark güncellerken bir hata oluştu.", error);
     }
+
     setEditingTrademark(null);
     fetchTrademarks();
   };
@@ -95,7 +94,7 @@ function EditTrademark() {
                 </Button>
               }
             >
-              <ListItemText primary={trademark.UrunAdi} />
+              <ListItemText primary={trademark.name} />
             </ListItem>
           ))}
         </List>
@@ -109,11 +108,11 @@ function EditTrademark() {
             <TextField
               fullWidth
               label="Ürün Adı"
-              value={editingTrademark.UrunAdi}
+              value={editingTrademark.name}
               onChange={(e) =>
                 setEditingTrademark({
                   ...editingTrademark,
-                  UrunAdi: e.target.value,
+                  name: e.target.value,
                 })
               }
               sx={{ mt: 2 }}

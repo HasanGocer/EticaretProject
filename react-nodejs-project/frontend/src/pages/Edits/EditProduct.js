@@ -20,7 +20,26 @@ import {
   Alert,
   InputLabel,
 } from "@mui/material";
-import axios from "axios";
+import {
+  getVariants,
+  getTrademarks,
+  getSubcategories,
+  getCategories,
+  getAdditionalFeatures,
+  GetAllProducts,
+  getProductVariant,
+  getProductVariantDetails,
+  updateProduct,
+  getProductAdditionalFeature,
+  getProductAdditionalFeatureDetails,
+} from ".../Api's/api";
+import {
+  calculateDiscountedPrice,
+  getCategoryName,
+  getTrademarkName,
+  getAdditionalFeatureNames,
+  getSubcategoryName,
+} from ".../components/ProductComps";
 
 function EditProduct() {
   //#region fields
@@ -29,9 +48,6 @@ function EditProduct() {
   const [trademarks, setTrademarks] = useState([]);
   const [variants, setVariants] = useState([]);
   const [additionalFeatures, setAdditionalFeatures] = useState([]);
-  const [productAdditionalFeatureDetails, setProductAdditionalFeatureDetails] =
-    useState([]);
-  const [productVariantsDetails, setProductVariantsDetails] = useState([]);
   const [selectedVariants, setSelectedVariants] = useState([]);
   const [selectedAdditionalFeatures, setSelectedAdditionalFeatures] = useState(
     []
@@ -45,113 +61,59 @@ function EditProduct() {
   //#region fetchs
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-products");
-      setProducts(response.data);
-      const response3 = await axios.get(
-        "http://localhost:5000/get-product-variant-details"
-      );
-      setProductVariantsDetails(response3.data);
-      const response4 = await axios.get(
-        "http://localhost:5000/get-product-additionalfeatures-details"
-      );
-      setProductAdditionalFeatureDetails(response4.data);
-      console.log(response4.data);
-      console.log(response.data);
-      console.log(response3.data);
+      const productsData = await GetAllProducts();
+      setProducts(productsData);
     } catch (error) {
       console.error("Ürünleri alırken bir hata oluştu.", error);
     }
   };
   const fetchDropdownData = async () => {
     try {
-      const categoryRes = await axios.get(
-        "http://localhost:5000/get-categorys"
-      );
-      setCategorys(categoryRes.data);
-      const trademarkRes = await axios.get(
-        "http://localhost:5000/get-trademarks"
-      );
-      setTrademarks(trademarkRes.data);
-      const additionalFeatureRes = await axios.get(
-        "http://localhost:5000/get-additionalfeatures"
-      );
-      setAdditionalFeatures(additionalFeatureRes.data);
-      const variantRes = await axios.get("http://localhost:5000/get-variants");
-      setVariants(variantRes.data);
+      const categoryData = await getCategories();
+      setCategorys(categoryData);
+
+      const trademarkData = await getTrademarks();
+      setTrademarks(trademarkData);
+
+      const additionalFeatureData = await getAdditionalFeatures();
+      setAdditionalFeatures(additionalFeatureData);
+
+      const variantData = await getVariants();
+      setVariants(variantData);
     } catch (error) {
       console.error("Dropdown verilerini alırken hata oluştu.", error);
     }
   };
-  const fetchDropdownSubCategoryData = async () => {
+  const fetchDropdownEditData = async (editingProduct) => {
     try {
-      const subcategoryRes = await axios.get(
-        "http://localhost:5000/get-subcategorys"
+      const subcategoryData = await getSubcategories(
+        editingProduct.category_id
       );
-      setSubcategorys(subcategoryRes.data);
+      setSubcategorys(subcategoryData);
+      const variantDetailsData = await getProductVariantDetails(
+        editingProduct.id
+      );
+      setSelectedVariants(variantDetailsData);
+      const additionalFeatureDetailsData =
+        await getProductAdditionalFeatureDetails(editingProduct.id);
+      setSelectedAdditionalFeatures(additionalFeatureDetailsData);
+
+      const additionalFeatureData = await getProductAdditionalFeature(
+        editingProduct.id
+      );
+      const variantData = await getProductVariant(editingProduct.id);
+
+      setEditingProduct((prev) => ({
+        ...prev,
+        variants_id: variantData,
+        additionalfeatures_id: additionalFeatureData,
+      }));
     } catch (error) {
       console.error("Dropdown verilerini alırken hata oluştu.", error);
     }
   };
   //#endregion
-  //#region tables comps
-  const calculateDiscountedPrice = (price, discountRate) => {
-    return price - (price * discountRate) / 100;
-  };
-  const getCategoryName = (categoryId) => {
-    const category = categorys.find((cat) => cat.ID === categoryId);
-    return category ? category.UrunAdi : "Bilinmeyen Kategori";
-  };
-  const getTrademarkName = (trademarkId) => {
-    const trademark = trademarks.find(
-      (trademark) => trademark.ID === trademarkId
-    );
-    return trademark ? trademark.UrunAdi : "Bilinmeyen Marka";
-  };
-  const getVariantNames = (variantIds) => {
-    const variantNames = productVariantsDetails
-      .filter((variant) => variant.product_id === variantIds.id) // Filtreleme yapıyoruz
-      .map((variant) => (
-        <li key={variant.id}>
-          {variant.variant_name} : {variant.detail_name}
-          {variant.image_data ? (
-            <img
-              src={variant.image_data}
-              alt="Varyant Resmi"
-              style={{
-                width: "50px",
-                height: "50px",
-                borderRadius: "8px",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              Resim Eklenmemiş
-            </Typography>
-          )}
-        </li>
-      )); // JSX döndürüyoruz
 
-    return variantNames.length > 0 ? variantNames : <li>Bilinmeyen Varyant</li>; // Eğer variant bulunmazsa, bir varsayılan mesaj döner
-  };
-  const getAdditionalFeatureNames = (featureIds) => {
-    const featureNames = productAdditionalFeatureDetails
-      .filter((feature) => feature.product_id === featureIds.id) // Filtreleme yapıyoruz
-      .map((feature) => (
-        <li key={feature.id}>
-          {feature.additional_feature_name} : {feature.details}
-        </li>
-      )); // JSX döndürüyoruz
-
-    return featureNames.length > 0 ? featureNames : <li>Bilinmeyen Özellik</li>; // Eğer özellik bulunmazsa, bir varsayılan mesaj döner
-  };
-  const getSubcategoryName = (subcategoryId) => {
-    const subcategory = subcategorys.find(
-      (subcat) => subcat.id === subcategoryId
-    );
-    return subcategory ? subcategory.name : "Bilinmeyen Alt Kategori";
-  };
-  //#endregion
   //#region  handles
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -178,45 +140,18 @@ function EditProduct() {
       JSON.stringify(selectedAdditionalFeatures)
     );
 
-    console.log(editingProduct.variants_id);
-    console.log(editingProduct.additionalfeatures_id);
-    console.log(selectedVariants);
-    console.log(selectedAdditionalFeatures);
-
-    // Add variant details if present
-    if (editingProduct.variant_details) {
-      data.append("variant_details", JSON.stringify(selectedVariants));
-    }
-
-    // Add additional feature details if present
-    if (editingProduct.additionalfeature_details) {
-      data.append(
-        "additionalfeature_details",
-        JSON.stringify(selectedAdditionalFeatures)
-      );
-    }
-
     try {
-      const response = await axios.put(
-        `http://localhost:5000/update-product/${editingProduct.id}`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const responseData = await updateProduct(editingProduct.id, data);
 
       setEditingProduct(null);
       setEditingTime(false);
-      setMessage(response.data.message);
-      fetchProducts(); // Re-fetch the product list to reflect the changes
+      setMessage(responseData.message);
+      fetchProducts(); // Güncellenmiş ürün listesini yeniden al
     } catch (error) {
       console.error("Ürün güncelleme hatası:", error);
       setMessage("Ürün güncellenirken bir hata oluştu.");
     }
   };
-
   const handleCancelEdit = () => {
     setEditingProduct(null);
   };
@@ -318,50 +253,11 @@ function EditProduct() {
   useEffect(() => {
     fetchDropdownData();
     fetchProducts();
-    fetchDropdownSubCategoryData();
   }, []);
   useEffect(() => {
     if (editingTime && editingProduct) {
-      // Varyant ID'lerini tutma
-      const tempSelectedVariantIds = productVariantsDetails
-        .filter((proVar) => proVar.product_id === editingProduct.id)
-        .map(
-          (proVar) =>
-            variants.find((variant) => variant.UrunAdi === proVar.variant_name)
-              ?.ID
-        )
-        .filter((id) => id);
-
-      // Varyantların product_id'lerini tutma
-      const tempVariantProductIds = productVariantsDetails
-        .filter((proVar) => proVar.product_id === editingProduct.id)
-        .map((proVar) => proVar);
-
-      // Ek Özellik ID'lerini tutma
-      const tempSelectedFeatureIds = productAdditionalFeatureDetails
-        .filter((proAdd) => proAdd.product_id === editingProduct.id)
-        .map(
-          (proAdd) =>
-            additionalFeatures.find(
-              (feature) => feature.UrunAdi === proAdd.additional_feature_name
-            )?.ID
-        )
-        .filter((id) => id);
-
-      // Ek Özelliklerin product_id'lerini tutma
-      const tempFeatureProductIds = productAdditionalFeatureDetails
-        .filter((proAdd) => proAdd.product_id === editingProduct.id)
-        .map((proAdd) => proAdd);
-
-      setSelectedAdditionalFeatures(tempFeatureProductIds);
-      setSelectedVariants(tempVariantProductIds);
-      setEditingProduct((prev) => ({
-        ...prev,
-        variants_id: tempSelectedVariantIds,
-        additionalfeatures_id: tempSelectedFeatureIds,
-      }));
+      fetchDropdownEditData(editingProduct);
     }
-    console.log(editingProduct);
   }, [editingTime]);
 
   return (
@@ -422,15 +318,25 @@ function EditProduct() {
                     ₺
                   </TableCell>
                   <TableCell>{product.description}</TableCell>
-                  <TableCell>{getCategoryName(product.category_id)}</TableCell>
                   <TableCell>
-                    {getSubcategoryName(product.subcategory_id)}
+                    {getCategoryName(categorys, product.category_id)}
                   </TableCell>
                   <TableCell>
-                    {getTrademarkName(product.trademark_id)}
+                    {getSubcategoryName(subcategorys, product.subcategory_id)}
                   </TableCell>
-                  <TableCell>{getVariantNames(product)}</TableCell>
-                  <TableCell>{getAdditionalFeatureNames(product)}</TableCell>
+                  <TableCell>
+                    {getTrademarkName(trademarks, product.trademark_id)}
+                  </TableCell>
+                  <TableCell>
+                    {getVariantNames(selectedVariants, variants, product)}
+                  </TableCell>
+                  <TableCell>
+                    {getAdditionalFeatureNames(
+                      selectedAdditionalFeatures,
+                      additionalFeatures,
+                      product
+                    )}
+                  </TableCell>
                   <TableCell>
                     <img
                       src={product.image_data}
@@ -616,8 +522,8 @@ function EditProduct() {
                   className="select-field"
                 >
                   {categorys.map((category) => (
-                    <MenuItem key={category.ID} value={category.ID}>
-                      {category.UrunAdi}
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -636,16 +542,11 @@ function EditProduct() {
                   className="select-field"
                 >
                   <MenuItem value="">Alt Kategori Seçin</MenuItem>
-                  {subcategorys
-                    .filter(
-                      (subcategory) =>
-                        subcategory.category_id === editingProduct.category_id
-                    )
-                    .map((subcategory) => (
-                      <MenuItem key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
-                      </MenuItem>
-                    ))}
+                  {subcategorys.map((subcategory) => (
+                    <MenuItem key={subcategory.id} value={subcategory.id}>
+                      {subcategory.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 
@@ -662,8 +563,8 @@ function EditProduct() {
                   className="select-field"
                 >
                   {trademarks.map((trademark) => (
-                    <MenuItem key={trademark.ID} value={trademark.ID}>
-                      {trademark.UrunAdi}
+                    <MenuItem key={trademark.id} value={trademark.id}>
+                      {trademark.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -672,26 +573,26 @@ function EditProduct() {
               <FormGroup>
                 <Typography variant="subtitle1">Varyantlar:</Typography>
                 {variants.map((variant) => (
-                  <div key={variant.ID}>
+                  <div key={variant.id}>
                     <FormControlLabel
                       control={
                         <Checkbox
-                          value={variant.ID}
+                          value={variant.id}
                           onChange={(e) =>
-                            handleVariantsCheckboxChange(e, variant.ID)
+                            handleVariantsCheckboxChange(e, variant.id)
                           }
                           checked={
-                            editingProduct?.variants_id?.includes(variant.ID) ||
+                            editingProduct?.variants_id?.includes(variant.id) ||
                             false
                           }
                         />
                       }
-                      label={variant.UrunAdi}
+                      label={variant.name}
                     />
-                    {editingProduct?.variants_id?.includes(variant.ID) && (
+                    {editingProduct?.variants_id?.includes(variant.id) && (
                       <>
                         {selectedVariants
-                          .filter((vars) => vars.variant_id === variant.ID)
+                          .filter((vars) => vars.variant_id === variant.id)
                           .map((vars, index) => (
                             <div key={index}>
                               {/* Varyant Ek Özelliği TextField */}
@@ -701,7 +602,7 @@ function EditProduct() {
                                 value={vars.detail_name || ""}
                                 onChange={(e) =>
                                   handleVariantDetailChange(
-                                    variant.ID,
+                                    variant.id,
                                     e.target.value
                                   )
                                 }
@@ -740,7 +641,7 @@ function EditProduct() {
                                   accept="image/*"
                                   onChange={(e) =>
                                     handleVariantImageChange(
-                                      variant.ID,
+                                      variant.id,
                                       e.target.files[0]
                                     )
                                   }
@@ -753,7 +654,7 @@ function EditProduct() {
                                 variant="outlined"
                                 color="secondary"
                                 onClick={() =>
-                                  removeVariantDetail(variant.ID, index)
+                                  removeVariantDetail(variant.id, index)
                                 }
                                 style={{ marginTop: "10px" }}
                               >
@@ -766,7 +667,7 @@ function EditProduct() {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => addVariantDetail(variant.ID)}
+                          onClick={() => addVariantDetail(variant.id)}
                           style={{ marginTop: "20px" }}
                         >
                           Yeni Varyant Detayı Ekle
@@ -780,36 +681,36 @@ function EditProduct() {
               <FormGroup>
                 <Typography variant="subtitle1">Ekstra Özellikler:</Typography>
                 {additionalFeatures.map((feature) => (
-                  <div key={feature.ID}>
+                  <div key={feature.id}>
                     <FormControlLabel
                       control={
                         <Checkbox
-                          value={feature.ID}
+                          value={feature.id}
                           onChange={(e) =>
                             handleAdditionalFeaturesCheckboxChange(
                               e,
-                              feature.ID
+                              feature.id
                             )
                           }
                           checked={
                             editingProduct?.additionalfeatures_id?.includes(
-                              feature.ID
+                              feature.id
                             ) || false
                           }
                         />
                       }
-                      label={feature.UrunAdi}
+                      label={feature.name}
                     />
                     {editingProduct?.additionalfeatures_id?.includes(
-                      feature.ID
+                      feature.id
                     ) && (
                       <TextField
                         label="Ekstra Özellik Detayı"
                         variant="outlined"
-                        value={getFeatureDetailValue(feature.ID)} // Detayı almak için yeni fonksiyon
+                        value={getFeatureDetailValue(feature.id)} // Detayı almak için yeni fonksiyon
                         onChange={(e) =>
                           handleAdditionalFeatureDetailsChange(
-                            feature.ID,
+                            feature.id,
                             "details",
                             e.target.value
                           )

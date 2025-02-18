@@ -11,29 +11,36 @@ router.post("/add", async (req, res) => {
   }
 
   try {
-    const query = "INSERT INTO subcategorys (category_id, name) VALUES (?, ?)";
+    const query = "INSERT INTO subcategories (category_id, name) VALUES (?, ?)";
     const [result] = await db.execute(query, [category_id, name]);
-    res
-      .status(201)
-      .json({
-        message: "Alt kategori başarıyla eklendi.",
-        subcategory: result,
-      });
+
+    res.status(201).json({
+      message: "Alt kategori başarıyla eklendi.",
+      subcategory: { id: result.insertId, category_id, name },
+    });
   } catch (err) {
     console.error("Veritabanına veri eklenirken hata: ", err);
     res
       .status(500)
-      .json({ message: "Veritabanına veri eklenirken hata oluştu." });
+      .json({ message: "Alt kategori eklenirken bir hata oluştu." });
   }
 });
-router.get("/get", async (req, res) => {
+router.get("/get/:category_id", async (req, res) => {
+  const { category_id } = req.params;
+
+  if (!category_id) {
+    return res.status(400).json({ error: "category_id parametresi gerekli!" });
+  }
+
   try {
-    const query = "SELECT * FROM subcategorys";
-    const [results] = await db.query(query);
-    res.status(200).json(results);
-  } catch (err) {
-    console.error("Alt kategoriler çekilirken hata oluştu:", err);
-    res.status(500).send("Bir hata oluştu.");
+    const [rows] = await db.execute(
+      "SELECT * FROM subcategorys WHERE category_id = ?",
+      [category_id]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error("Veritabanı hatası:", error);
+    res.status(500).json({ error: "Veritabanı hatası" });
   }
 });
 router.put("/update/:id", async (req, res) => {

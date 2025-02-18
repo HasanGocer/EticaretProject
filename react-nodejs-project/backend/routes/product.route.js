@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/add", upload.single("image_data"), async (req, res) => {
+router.post("/add", upload.single("image"), async (req, res) => {
   try {
     const {
       name,
@@ -42,9 +42,10 @@ router.post("/add", upload.single("image_data"), async (req, res) => {
     }
 
     const imageUrl = `/uploads/${req.file.filename}`;
+
     const productQuery = `
       INSERT INTO products 
-      (image_data, name, price, stockCode, stockQuantity, discountRate, description, category_id, trademark_id, subcategory_id)
+      (image, name, price, stockCode, stockQuantity, discountRate, description, category_id, trademark_id, subcategory_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
@@ -61,7 +62,9 @@ router.post("/add", upload.single("image_data"), async (req, res) => {
       subcategory_id,
     ]);
 
-    res.status(200).json({ message: "Ürün başarıyla eklendi." });
+    res
+      .status(200)
+      .json({ message: "Ürün başarıyla eklendi.", productId: result.insertId });
   } catch (err) {
     console.error("Ürün ekleme hatası:", err);
     res.status(500).json({ message: "Veritabanına ürün eklenemedi." });
@@ -76,7 +79,7 @@ router.get("/get", async (req, res) => {
     res.status(500).json({ message: "Ürünler alınamadı." });
   }
 });
-router.put("/update/:id", upload.single("image_data"), async (req, res) => {
+router.put("/update/:id", upload.single("image"), async (req, res) => {
   try {
     const {
       name,
@@ -102,7 +105,7 @@ router.put("/update/:id", upload.single("image_data"), async (req, res) => {
     let updateQuery = `
         UPDATE products
         SET name = ?, price = ?, stockCode = ?, stockQuantity = ?, discountRate = ?, description = ?, category_id = ?, trademark_id = ?, subcategory_id = ?
-      `;
+    `;
 
     const queryParams = [
       name,
@@ -117,7 +120,7 @@ router.put("/update/:id", upload.single("image_data"), async (req, res) => {
     ];
 
     if (imageUrl) {
-      updateQuery += ", image_data = ?";
+      updateQuery += ", image = ?";
       queryParams.push(imageUrl);
     }
 

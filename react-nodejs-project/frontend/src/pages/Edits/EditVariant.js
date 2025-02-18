@@ -11,7 +11,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import axios from "axios";
+import { getVariants, updateVariantHG } from ".../Api's/api";
 
 function EditVariant() {
   const [message, setMessage] = useState("");
@@ -21,8 +21,8 @@ function EditVariant() {
   // Varyantları çekme
   const fetchVariants = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-variants");
-      setVariants(response.data);
+      const variantsData = await getVariants();
+      setVariants(variantsData);
     } catch (error) {
       console.error("Varyantları alırken bir hata oluştu.", error);
     }
@@ -31,15 +31,15 @@ function EditVariant() {
   // Varyantı güncelleme
   const updateVariant = async () => {
     try {
-      console.log(editingVariant);
-      const response = await axios.put(
-        `http://localhost:5000/update-variant/${editingVariant.ID}`,
-        { UrunAdi: editingVariant.UrunAdi }
-      );
-      setMessage(response.data.message);
+      const responseData = await updateVariantHG(editingVariant.ID, {
+        name: editingVariant.name,
+      });
+
+      setMessage(responseData.message);
     } catch (error) {
       console.error("Varyant güncellerken bir hata oluştu.", error);
     }
+
     setEditingVariant(null);
     fetchVariants();
   };
@@ -81,7 +81,7 @@ function EditVariant() {
         {variants.map((variant) => (
           <Paper key={variant.ID} className="variant-item">
             <ListItem>
-              <ListItemText primary={variant.UrunAdi} />
+              <ListItemText primary={variant.name} />
               <Box>
                 <Button
                   variant="contained"
@@ -106,11 +106,11 @@ function EditVariant() {
           <TextField
             fullWidth
             label="Ürün Adı"
-            value={editingVariant?.UrunAdi || ""}
+            value={editingVariant?.name || ""}
             onChange={(e) =>
               setEditingVariant({
                 ...editingVariant,
-                UrunAdi: e.target.value,
+                name: e.target.value,
               })
             }
             className="input-field"

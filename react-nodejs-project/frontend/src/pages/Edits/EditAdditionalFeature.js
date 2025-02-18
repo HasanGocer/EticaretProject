@@ -15,6 +15,7 @@ import {
   Paper,
 } from "@mui/material";
 import axios from "axios";
+import { getAdditionalFeatures, updateAdditionalFeature } from ".../Api's/api";
 
 function EditAdditionalFeature() {
   const [message, setMessage] = useState("");
@@ -24,10 +25,8 @@ function EditAdditionalFeature() {
   // Fetch additional features
   const fetchAdditionalFeatures = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/get-additionalfeatures"
-      );
-      setAdditionalFeatures(response.data);
+      const additionalFeatures = await getAdditionalFeatures();
+      setAdditionalFeatures(additionalFeatures);
     } catch (error) {
       console.error("Error fetching additional features.", error);
     }
@@ -36,14 +35,15 @@ function EditAdditionalFeature() {
   // Update additional feature
   const updateFeature = async () => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/update-additionalfeature/${editingFeature.ID}`,
-        { UrunAdi: editingFeature.UrunAdi }
-      );
-      setMessage(response.data.message);
+      const responseData = await updateAdditionalFeature(editingFeature.ID, {
+        name: editingFeature.name,
+      });
+
+      setMessage(responseData.message);
     } catch (error) {
       console.error("Error updating additional feature.", error);
     }
+
     setEditingFeature(null);
     fetchAdditionalFeatures();
   };
@@ -95,7 +95,7 @@ function EditAdditionalFeature() {
                 </Button>
               }
             >
-              <ListItemText primary={feature.UrunAdi} />
+              <ListItemText primary={feature.name} />
             </ListItem>
           ))}
         </List>
@@ -110,11 +110,11 @@ function EditAdditionalFeature() {
               fullWidth
               margin="normal"
               label="Ürün Adı"
-              value={editingFeature.UrunAdi}
+              value={editingFeature.name}
               onChange={(e) =>
                 setEditingFeature({
                   ...editingFeature,
-                  UrunAdi: e.target.value,
+                  name: e.target.value,
                 })
               }
             />

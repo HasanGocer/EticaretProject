@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Box,
   Button,
@@ -15,6 +14,14 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+  getCategories,
+  addCategory,
+  deleteCategory,
+  getSubcategories,
+  deleteSubcategory,
+  addSubcategory,
+} from ".../Api's/api";
 
 function AddCategory() {
   const [category, setCategory] = useState("");
@@ -25,23 +32,18 @@ function AddCategory() {
   const [subcategories, setSubategories] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
 
-  // Fetch kategorileri
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-categorys");
-      setCategories(response.data);
+      const categoriesData = await getCategories();
+      setCategories(categoriesData);
     } catch (error) {
       console.error("Kategoriler alınırken bir hata oluştu", error);
     }
   };
-
-  // Alt Kategori çekme
   const fetchSubcategories = async (categoryId) => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/get-subcategorys"
-      );
-      setSubategories(response.data);
+      const subcategoriesData = await getSubcategories(categoryId);
+      setSubategories(subcategoriesData);
     } catch (error) {
       console.error("Alt Kategoriler çekilirken hata oluştu", error);
     }
@@ -54,56 +56,42 @@ function AddCategory() {
 
   const handleDeleteCategory = async (id) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:5000/delete-category/${id}`
-      );
-      console.log("Backend yanıtı:", response.data);
-      setMessage(response.data.message);
+      const responseData = await deleteCategory(id);
+      setMessage(responseData.message);
       fetchCategories();
     } catch (error) {
-      console.error("Silme işlemi sırasında hata:", error.response?.data);
-      if (error.response && error.response.data?.message) {
-        setMessage(error.response.data.message);
+      console.error("Silme işlemi sırasında hata:", error);
+      if (error?.message) {
+        setMessage(error);
       } else {
         setMessage("Kategori silinirken beklenmeyen bir hata oluştu.");
       }
     }
   };
-
   const handleDeleteSubcategory = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/delete-subcategory/${id}`);
+      await deleteSubcategory(id);
       setMessage("Alt kategori silindi.");
       fetchSubcategories();
     } catch (error) {
       setMessage("Alt kategori silinemedi.");
     }
   };
-
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/add-category", {
-        category,
-      });
-      setMessage(response.data.message);
+      const responseData = await addCategory(category);
+      setMessage(responseData.message);
       fetchCategories();
     } catch (error) {
       setMessage("Bir hata oluştu.");
     }
   };
-
   const handleSubcategorySubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:5000/add-subcategory",
-        {
-          category_id: selectedCategory,
-          name: subcategory,
-        }
-      );
-      setMessage(response.data.message);
+      const responseData = await addSubcategory(selectedCategory, subcategory);
+      setMessage(responseData.message);
       fetchSubcategories();
     } catch (error) {
       setMessage("Alt kategori eklenirken bir hata oluştu.");
@@ -169,8 +157,8 @@ function AddCategory() {
           >
             <option value="">Bir kategori seçin</option>
             {categories.map((cat) => (
-              <option key={cat.ID} value={cat.ID}>
-                {cat.UrunAdi}
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
               </option>
             ))}
           </TextField>
@@ -199,17 +187,17 @@ function AddCategory() {
           <AccordionDetails>
             {categories.map((category) => (
               <Accordion
-                key={category.ID}
-                expanded={expandedCategories[category.ID] || false}
-                onChange={() => toggleExpandCategory(category.ID)}
+                key={category.id}
+                expanded={expandedCategories[category.id] || false}
+                onChange={() => toggleExpandCategory(category.id)}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  aria-controls={`panel${category.ID}-content`}
+                  aria-controls={`panel${category.id}-content`}
                 >
-                  <Typography>{category.UrunAdi}</Typography>
+                  <Typography>{category.name}</Typography>
                   <IconButton
-                    onClick={() => handleDeleteCategory(category.ID)}
+                    onClick={() => handleDeleteCategory(category.id)}
                     color="error"
                     sx={{ padding: "8px" }}
                   >
@@ -219,13 +207,13 @@ function AddCategory() {
                 <AccordionDetails>
                   <List>
                     {subcategories
-                      .filter((sub) => sub.category_id === category.ID)
+                      .filter((sub) => sub.category_id === category.id)
                       .map((subcategory) => (
                         <ListItem key={subcategory.id}>
                           <Typography>{subcategory.name}</Typography>
                           <IconButton
                             onClick={() =>
-                              handleDeleteSubcategory(subcategory.ID)
+                              handleDeleteSubcategory(subcategory.id)
                             }
                             color="error"
                             sx={{ padding: "8px" }}
