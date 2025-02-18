@@ -16,7 +16,7 @@ router.post("/add", async (req, res) => {
 
     res.status(201).json({
       message: "Alt kategori başarıyla eklendi.",
-      subcategory: { id: result.insertId, category_id, name },
+      subcategory: { result },
     });
   } catch (err) {
     console.error("Veritabanına veri eklenirken hata: ", err);
