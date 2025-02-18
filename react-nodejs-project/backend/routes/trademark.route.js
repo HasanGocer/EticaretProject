@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/addHG", upload.single("image_data"), async (req, res) => {
+router.post("/addHG", async (req, res) => {
   try {
     const { name } = req.body;
     return res.status(400).json({ message: "Girdik" });
