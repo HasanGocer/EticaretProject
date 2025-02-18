@@ -1,12 +1,7 @@
-import React from 'react';
+import React from "react";
 
 const NotFoundP = () => {
-
-
-  return (
-      <div>
-    </div>
-  );
+  return <div>hata</div>;
 };
 
 export default NotFoundP;
