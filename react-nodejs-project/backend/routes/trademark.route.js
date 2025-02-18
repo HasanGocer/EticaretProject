@@ -30,7 +30,7 @@ const upload = multer({ storage });
 router.post("/addHG", upload.single("image_data"), async (req, res) => {
   try {
     const { name } = req.body;
-
+    return res.status(400).json({ message: "Resim dosyası gereklidir." });
     if (!req.file) {
       return res.status(400).json({ message: "Resim dosyası gereklidir." });
     }
