@@ -27,10 +27,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/addHG", async (req, res) => {
+router.post("/add-hg", async (req, res) => {
   try {
-    const { name } = req.body;
     return res.status(400).json({ message: "Girdik" });
+    const { name } = req.body;
     if (!req.file) {
       return res.status(400).json({ message: "Resim dosyası gereklidir." });
     }
