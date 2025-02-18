@@ -90,6 +90,7 @@ function AddCategory() {
   const handleSubcategorySubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log(selectedCategory);
       const responseData = await addSubcategory(
         selectedCategory.id,
         subcategory

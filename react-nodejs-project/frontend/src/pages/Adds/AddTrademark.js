@@ -148,7 +148,7 @@ function AddTrademark() {
           <List sx={{ width: "100%" }}>
             {trademarks.map((trademark) => (
               <ListItem
-                key={trademark.ID}
+                key={trademark.id}
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -172,7 +172,7 @@ function AddTrademark() {
                   <Typography>{trademark.name}</Typography>
                 </Box>
                 <IconButton
-                  onClick={() => handleDelete(trademark.ID)}
+                  onClick={() => handleDelete(trademark.id)}
                   color="error"
                   sx={{ padding: "8px" }}
                 >
