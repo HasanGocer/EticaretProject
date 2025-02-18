@@ -4,13 +4,13 @@ import { db } from "../db.js";
 const router = express.Router();
 
 router.post("/add", async (req, res) => {
-  const { category_id, name } = req.body;
-
-  if (!category_id || !name) {
-    return res.status(400).json({ message: "Eksik bilgi gönderildi." });
-  }
-
   try {
+    const { category_id, name } = req.body;
+
+    if (!category_id || !name) {
+      return res.status(400).json({ message: "Eksik bilgi gönderildi." });
+    }
+
     const query = "INSERT INTO subcategories (category_id, name) VALUES (?, ?)";
     const [result] = await db.execute(query, [category_id, name]);
 

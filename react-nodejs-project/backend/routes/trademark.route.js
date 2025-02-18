@@ -27,22 +27,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/add", upload.single("image"), async (req, res) => {
-  const { trademark } = req.body;
-
-  if (!req.file) {
-    return res.status(400).json({ message: "Resim dosyası gereklidir." });
-  }
-
-  if (!trademark) {
-    return res.status(400).json({ message: "Trademark adı gereklidir." });
-  }
-  const imageUrl = `/uploads/${req.file.filename}`;
-
+router.post("/add", upload.single("image_data"), async (req, res) => {
   try {
+    const { trademark } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Resim dosyası gereklidir." });
+    }
+
+    if (!trademark) {
+      return res.status(400).json({ message: "Trademark adı gereklidir." });
+    }
+    const image_data = `/uploads/${req.file.filename}`;
+
     const [result] = await db.query(
-      "INSERT INTO trademarks (name, image) VALUES (?, ?)",
-      [trademark, imageUrl]
+      "INSERT INTO trademarks (name, image_data) VALUES (?, ?)",
+      [trademark, image_data]
     );
     res.status(200).json({
       message: "Özellik başarıyla eklendi!",

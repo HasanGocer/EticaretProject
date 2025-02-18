@@ -234,11 +234,11 @@ export const getTrademarks = async () => {
     throw error.response?.data || "Trademarkları alırken bir hata oluştu.";
   }
 };
-export const addTrademarkHG = async (trademark, image) => {
+export const addTrademarkHG = async (trademark, image_data) => {
   try {
     const formData = new FormData();
     formData.append("trademark", trademark);
-    formData.append("image", image);
+    formData.append("image_data", image_data);
 
     const response = await axios.post(`${API_URL}/trademark/add`, formData, {
       headers: {
