@@ -35,7 +35,7 @@ function EditAdditionalFeature() {
   // Update additional feature
   const updateFeature = async () => {
     try {
-      const responseData = await updateAdditionalFeature(editingFeature.ID, {
+      const responseData = await updateAdditionalFeature(editingFeature.id, {
         name: editingFeature.name,
       });
 

@@ -31,7 +31,7 @@ function EditVariant() {
   // Varyantı güncelleme
   const updateVariant = async () => {
     try {
-      const responseData = await updateVariantHG(editingVariant.ID, {
+      const responseData = await updateVariantHG(editingVariant.id, {
         name: editingVariant.name,
       });
 
