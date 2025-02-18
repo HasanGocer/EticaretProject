@@ -22,7 +22,7 @@ import {
   getCategories,
   getAdditionalFeatures,
   addProduct,
-} from ".../Api's/api";
+} from "../../Apis/api";
 
 function AddProduct() {
   //#region fields

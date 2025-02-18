@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AuthService from "../../Api's/auth.service";
+import AuthService from "../../Apis/auth.service";
 import "./Register.css";
 
 const Register = () => {

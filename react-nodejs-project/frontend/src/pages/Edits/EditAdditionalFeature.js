@@ -15,7 +15,7 @@ import {
   Paper,
 } from "@mui/material";
 import axios from "axios";
-import { getAdditionalFeatures, updateAdditionalFeature } from ".../Api's/api";
+import { getAdditionalFeatures, updateAdditionalFeature } from "../../Apis/api";
 
 function EditAdditionalFeature() {
   const [message, setMessage] = useState("");

@@ -32,7 +32,7 @@ import {
   updateProduct,
   getProductAdditionalFeature,
   getProductAdditionalFeatureDetails,
-} from ".../Api's/api";
+} from "../../Apis/api";
 import {
   calculateDiscountedPrice,
   getCategoryName,

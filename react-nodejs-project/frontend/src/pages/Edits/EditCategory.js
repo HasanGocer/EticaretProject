@@ -15,7 +15,7 @@ import {
   getSubcategories,
   updateCategoryHG,
   updateSubcategoryHG,
-} from ".../Api's/api";
+} from "../../Apis/api";
 function EditCategory() {
   const [message, setMessage] = useState("");
   const [categories, setCategories] = useState([]);

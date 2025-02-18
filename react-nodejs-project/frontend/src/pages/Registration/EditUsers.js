@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AuthService from "../../Api's/auth.service";
+import AuthService from "../../Apis/auth.service";
 import { Link } from "react-router-dom";
 import "./EditUsers.css";
 

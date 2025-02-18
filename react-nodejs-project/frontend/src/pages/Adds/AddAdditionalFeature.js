@@ -16,7 +16,7 @@ import {
   addAdditionalFeature,
   getAdditionalFeatures,
   deleteAdditionalFeature,
-} from ".../Api's/api";
+} from "../../Apis/api";
 
 function AddAdditionalFeature() {
   const [additionalfeature, setAdditionalfeature] = useState("");

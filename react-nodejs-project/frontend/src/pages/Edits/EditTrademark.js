@@ -14,7 +14,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import { getTrademarks, updateTrademarkHG } from ".../Api's/api";
+import { getTrademarks, updateTrademarkHG } from "../../Apis/api";
 function EditTrademark() {
   const [message, setMessage] = useState("");
   const [trademarks, setTrademarks] = useState([]);

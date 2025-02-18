@@ -11,7 +11,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import { getVariants, updateVariantHG } from ".../Api's/api";
+import { getVariants, updateVariantHG } from "../../Apis/api";
 
 function EditVariant() {
   const [message, setMessage] = useState("");

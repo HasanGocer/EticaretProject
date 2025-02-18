@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { getTrademarks, deleteTrademark, addTrademarkHG } from ".../Api's/api";
+import { getTrademarks, deleteTrademark, addTrademarkHG } from "../../Apis/api";
 
 function AddTrademark() {
   const [trademark, setTrademark] = useState("");

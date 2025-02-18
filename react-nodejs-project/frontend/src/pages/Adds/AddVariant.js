@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { getVariants, deleteVariant, addVariant } from ".../Api's/api";
+import { getVariants, deleteVariant, addVariant } from "../../Apis/api";
 
 // AddVariant Bileşeni
 function AddVariant() {

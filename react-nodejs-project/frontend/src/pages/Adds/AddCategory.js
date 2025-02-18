@@ -21,7 +21,7 @@ import {
   getSubcategories,
   deleteSubcategory,
   addSubcategory,
-} from ".../Api's/api";
+} from "../../Apis/api";
 
 function AddCategory() {
   const [category, setCategory] = useState("");

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Box, Hidden } from "@mui/material";
 import ProductCard from "../components/ProductCard";
-import { GetAllProducts } from "../Api's/api";
+import { GetAllProducts } from "../Apis/api";
 import "./Sale.css";
 
 const Sale = () => {

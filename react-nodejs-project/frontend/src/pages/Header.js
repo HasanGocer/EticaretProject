@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../Api's/auth.service";
+import AuthService from "../Apis/auth.service";
 import { useCart } from "../context/CartContext";
-import { GetAllProducts } from "../Api's/api";
+import { GetAllProducts } from "../Apis/api";
 import axios from "axios";
 import {
   Box,
