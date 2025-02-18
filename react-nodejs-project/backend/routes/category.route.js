@@ -4,18 +4,21 @@ import { db } from "../db.js";
 
 const router = express.Router();
 
-router.post("/add", (req, res) => {
+router.post("/add", async (req, res) => {
   const { name } = req.body;
-  const sql = "INSERT INTO categorys (name) VALUES (?)";
-  db.query(sql, [name], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
+
+  try {
+    const [result] = await db.query("INSERT INTO categorys (name) VALUES (?)", [
+      name,
+    ]);
     res.status(200).json({
-      message: "Kategori başarıyla eklendi!",
+      message: "Özellik başarıyla eklendi!",
       category: result,
     });
-  });
+  } catch (err) {
+    console.error("Veritabanı hatası:", err);
+    res.status(500).json({ message: "Sunucu hatası" });
+  }
 });
 
 router.get("/get", (req, res) => {
@@ -29,7 +32,6 @@ router.get("/get", (req, res) => {
     res.status(200).json(results);
   });
 });
-
 router.put("/update/:id", (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
@@ -52,7 +54,6 @@ router.put("/update/:id", (req, res) => {
     }
   });
 });
-
 router.delete("/delete/:id", (req, res) => {
   const { id } = req.params;
 

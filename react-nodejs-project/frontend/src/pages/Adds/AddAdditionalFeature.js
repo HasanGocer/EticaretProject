@@ -101,12 +101,12 @@ function AddAdditionalFeature() {
       <List>
         {additionalfeatures.map((feature) => (
           <ListItem
-            key={feature.ID}
+            key={feature.id}
             secondaryAction={
               <IconButton
                 color="error"
                 sx={{ padding: "8px" }}
-                onClick={() => handleDelete(feature.ID)}
+                onClick={() => handleDelete(feature.id)}
               >
                 <DeleteIcon />
               </IconButton>
