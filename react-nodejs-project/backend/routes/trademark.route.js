@@ -1,8 +1,8 @@
 import express from "express";
 import multer from "multer";
+import { db } from "../db.js";
 import path from "path";
 import fs from "fs";
-import { db } from "../db.js"; // Veritabanı bağlantısı
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// Multer yapılandırması
+// Multer konfigürasyonu
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -27,22 +27,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/add", upload.single("image_data"), async (req, res) => {
+router.post("/addHG", upload.single("image_data"), async (req, res) => {
   try {
-    const { trademark } = req.body;
+    const { name } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ message: "Resim dosyası gereklidir." });
     }
 
-    if (!trademark) {
+    if (!name) {
       return res.status(400).json({ message: "Trademark adı gereklidir." });
     }
     const image_data = `/uploads/${req.file.filename}`;
 
     const [result] = await db.query(
-      "INSERT INTO trademarks (name, image_data) VALUES (?, ?)",
-      [trademark, image_data]
+      "INSERT INTO trademarks (name, image_data ) VALUES (?, ?)",
+      [name, image_data]
     );
     res.status(200).json({
       message: "Özellik başarıyla eklendi!",

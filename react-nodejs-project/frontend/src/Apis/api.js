@@ -237,13 +237,11 @@ export const getTrademarks = async () => {
 export const addTrademarkHG = async (trademark, image_data) => {
   try {
     const formData = new FormData();
-    formData.append("trademark", trademark);
+    formData.append("name", trademark);
     formData.append("image_data", image_data);
 
-    const response = await axios.post(`${API_URL}/trademark/add`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await axios.post(`${API_URL}/trademark/addHG`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   } catch (error) {
